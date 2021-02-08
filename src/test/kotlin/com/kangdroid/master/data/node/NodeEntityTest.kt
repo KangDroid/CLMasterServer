@@ -1,7 +1,5 @@
-package com.kangdroid.master.data
+package com.kangdroid.master.data.node
 
-import com.kangdroid.master.data.node.Node
-import com.kangdroid.master.data.node.NodeEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.jupiter.api.Test
