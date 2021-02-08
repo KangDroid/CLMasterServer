@@ -5,6 +5,7 @@ import com.kangdroid.master.data.node.Node
 class NodeSaveRequestDto(
         var id: Long,
         var hostName: String,
+        var hostPort: String,
         var ipAddress: String
 ) {
     fun toEntity(): Node {
@@ -12,6 +13,7 @@ class NodeSaveRequestDto(
                 id = this.id,
                 hostName = this.hostName,
                 ipAddress = this.ipAddress,
+                hostPort = this.hostPort,
                 regionName = "TMP_REGION"
         )
     }

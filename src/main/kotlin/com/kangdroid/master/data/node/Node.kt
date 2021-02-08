@@ -15,5 +15,8 @@ class Node(
     var ipAddress: String,
 
     @Column(length = 500, nullable = false)
+    var hostPort: String,
+
+    @Column(length = 500, nullable = false)
     var regionName: String
 )

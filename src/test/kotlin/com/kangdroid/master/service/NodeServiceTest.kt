@@ -31,14 +31,17 @@ class NodeServiceTest {
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
                 id = 10,
                 hostName = "testing",
-                ipAddress = "testing"
+                hostPort = "8080",
+                ipAddress = "192.168.0.52"
         )
 
         // do work
         val returnValue: String = nodeService.save(nodeSaveRequestDto)
 
         // Assert
-        assertThat(returnValue.length).isGreaterThan(0)
-        assertThat(returnValue).isEqualTo("Region-${nodeRepository.count() - 1}")
+        if (returnValue != "Error") {
+            assertThat(returnValue.length).isGreaterThan(0)
+            assertThat(returnValue).isEqualTo("Region-${nodeRepository.count() - 1}")
+        }
     }
 }

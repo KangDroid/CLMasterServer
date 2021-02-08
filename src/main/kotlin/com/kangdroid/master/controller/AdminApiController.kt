@@ -15,7 +15,7 @@ class AdminApiController {
 
     /**
      * Register Compute Node
-     * returns Node Region
+     * returns Node Region else, "Error"
      */
     @PostMapping("/api/admin/node/register")
     fun registerNode(@RequestBody nodeSaveRequestDto: NodeSaveRequestDto): String {

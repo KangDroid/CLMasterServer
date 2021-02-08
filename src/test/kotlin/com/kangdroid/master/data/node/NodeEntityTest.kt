@@ -27,6 +27,7 @@ class NodeEntityTest {
                 id = 1000,
                 hostName = "localhost",
                 ipAddress = "192.168.0.8",
+                hostPort = "8080",
                 regionName = ""
         )
 
