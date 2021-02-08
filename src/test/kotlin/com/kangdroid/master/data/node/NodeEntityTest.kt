@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner
 class NodeEntityTest {
 
     @Autowired
-    private lateinit var nodeEntity: NodeEntity
+    private lateinit var nodeEntity: NodeRepository
 
     @After
     fun clearAll() {
@@ -26,7 +26,8 @@ class NodeEntityTest {
         val nodeTmp: Node = Node(
                 id = 1000,
                 hostName = "localhost",
-                ipAddress = "192.168.0.8"
+                ipAddress = "192.168.0.8",
+                regionName = ""
         )
 
         // save
