@@ -1,4 +1,4 @@
-package com.kangdroid.master.data
+package com.kangdroid.master.data.node
 
 import javax.persistence.*
 
