@@ -18,6 +18,11 @@ class NodeService {
         val node: Node = nodeSaveRequestDto.toEntity()
         node.regionName = "Region-${nodeRepository.count()}"
 
+        val nodeGot: Node = nodeRepository.findByIpAddress(node.ipAddress) ?: Node(id = Long.MAX_VALUE, "", "", "", "")
+        if (nodeGot.id != Long.MAX_VALUE) {
+            return "Error"
+        }
+
         // Check for node integrity
         return if (isNodeRunning(nodeSaveRequestDto)) {
             nodeRepository.save(node).regionName
