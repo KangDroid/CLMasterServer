@@ -1,5 +1,6 @@
 package com.kangdroid.master.service
 
+import com.kangdroid.master.data.docker.DockerImage
 import com.kangdroid.master.data.docker.DockerImageRepository
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
@@ -14,6 +15,10 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 import java.util.stream.Collectors
+import javax.persistence.Column
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
 
 @Service
 class NodeService {
@@ -44,10 +49,18 @@ class NodeService {
             println(e.stackTraceToString())
             return UserImageResponseDto(errorMessage = "Cannot communicate with Compute node!")
         }
-
-        return responseEntity.body?.also {
+        val userImageResponseDto: UserImageResponseDto = responseEntity.body?.also {
             it.regionLocation = userImageSaveRequestDto.computeRegion
         } ?: UserImageResponseDto(errorMessage = "Getting Response from Compute Node failed!")
+
+        dockerImageRepository.save(DockerImage(
+                userName = userImageSaveRequestDto.userName,
+                userPassword = userImageSaveRequestDto.userPassword,
+                dockerId = userImageResponseDto.containerId,
+                computeRegion = userImageResponseDto.regionLocation
+        ))
+
+        return userImageResponseDto
     }
 
     /**
