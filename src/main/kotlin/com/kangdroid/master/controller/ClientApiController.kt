@@ -24,6 +24,6 @@ class ClientApiController {
     // Finally Register
     @PostMapping("/api/client/register")
     fun registerUserDocker(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto): String {
-        return nodeService.createContainer(userImageSaveRequestDto.computeRegion)
+        return nodeService.createContainer(userImageSaveRequestDto)
     }
 }

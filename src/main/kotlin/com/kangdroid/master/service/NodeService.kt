@@ -1,5 +1,7 @@
 package com.kangdroid.master.service
 
+import com.kangdroid.master.data.docker.DockerImageRepository
+import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.Node
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
@@ -17,8 +19,11 @@ class NodeService {
     @Autowired
     private lateinit var nodeRepository: NodeRepository
 
-    fun createContainer(region: String): String {
-        val node: Node = nodeRepository.findByRegionName(region) ?: return "Error"
+    @Autowired
+    private lateinit var dockerImageRepository: DockerImageRepository
+
+    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): String {
+        val node: Node = nodeRepository.findByRegionName(userImageSaveRequestDto.computeRegion) ?: return "Error"
 
         val restTemplate: RestTemplate = RestTemplate()
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
@@ -29,7 +34,13 @@ class NodeService {
             return "Error"
         }
 
-        return responseEntity.body ?: "Error"
+        return if (responseEntity.body != null) {
+            userImageSaveRequestDto.dockerId = responseEntity.body!!
+            dockerImageRepository.save(userImageSaveRequestDto.toEntity())
+            responseEntity.body!!
+        } else {
+            "Error"
+        }
     }
 
     fun getNodeLoad(): List<NodeLoadResponseDto> {
