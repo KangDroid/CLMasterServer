@@ -6,4 +6,7 @@ import org.springframework.transaction.annotation.Transactional
 interface NodeRepository: JpaRepository<Node, Long> {
     @Transactional(readOnly = true)
     fun findByIpAddress(target: String): Node?
+
+    @Transactional(readOnly = true)
+    fun findByRegionName(target: String): Node?
 }

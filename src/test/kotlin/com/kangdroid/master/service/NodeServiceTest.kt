@@ -1,6 +1,7 @@
 package com.kangdroid.master.service
 
 import com.kangdroid.master.data.node.NodeRepository
+import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -23,6 +24,28 @@ class NodeServiceTest {
     @After
     fun clearAllRepo() {
         nodeRepository.deleteAll()
+    }
+
+    @Test
+    fun isGetLoadWorksWell() {
+        // Let
+        val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
+                id = 10,
+                hostName = "testing",
+                hostPort = "8080",
+                ipAddress = "192.168.0.52"
+        )
+        val returnValue: String = nodeService.save(nodeSaveRequestDto)
+
+        // Assert
+        if (returnValue != "Error") {
+            val list: List<NodeLoadResponseDto> = nodeService.getNodeLoad()
+            assertThat(list.size).isEqualTo(1)
+            assertThat(list[0].nodeLoadPercentage).isNotEmpty
+            assertThat(list[0].regionName).isNotEmpty
+//            println("Region: ${list[0].regionName}")
+//            println("Current Load Percentage: ${list[0].nodeLoadPercentage}%")
+        }
     }
 
     @Test
