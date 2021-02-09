@@ -15,13 +15,21 @@ class ClientApiController {
     @Autowired
     private lateinit var nodeService: NodeService
 
-    // Get Node load data
+    /**
+     * getNodeLoad(): Get All of Registered Node Load as List.
+     * Returns: List of <NodeLoadResponseDto>[containing Load information]
+     */
     @GetMapping("/api/client/node/load")
     fun getNodeLoad(): List<NodeLoadResponseDto> {
         return nodeService.getNodeLoad()
     }
 
-    // Finally Register
+    /**
+     * registerUserDocker(param dto): Create User with Docker Image Creation
+     * Basically calling this api will create an unique-docker image[with openssh enabled], with registering user.
+     * returns: A String, containing Docker Container ID
+     * returns: A String, containing "Error" for error.
+     */
     @PostMapping("/api/client/register")
     fun registerUserDocker(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto): String {
         return nodeService.createContainer(userImageSaveRequestDto)

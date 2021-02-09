@@ -22,9 +22,17 @@ class NodeService {
     @Autowired
     private lateinit var dockerImageRepository: DockerImageRepository
 
+    /**
+     * createContainer(param dto): Create Container in Compute Node's Server, with given DTO
+     * Param: UserImageSaveRequestDto[id, password, docker-ID, compute-region]
+     * returns: A String, containing Docker container's ID
+     * returns: A String, containing "Error"
+     */
     fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): String {
+        // Find Compute Node information given DTO - to register image on that container.
         val node: Node = nodeRepository.findByRegionName(userImageSaveRequestDto.computeRegion) ?: return "Error"
 
+        // Request compute-node to create a fresh container
         val restTemplate: RestTemplate = RestTemplate()
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
         val responseEntity: ResponseEntity<String> = try {
@@ -34,6 +42,7 @@ class NodeService {
             return "Error"
         }
 
+        // Return values
         return if (responseEntity.body != null) {
             userImageSaveRequestDto.dockerId = responseEntity.body!!
             dockerImageRepository.save(userImageSaveRequestDto.toEntity())
@@ -43,16 +52,31 @@ class NodeService {
         }
     }
 
+    /**
+     * getNodeLoad(): Get All of load information, in registered node on master's db.
+     * returns: List of <NodeLoadResponseDto>[Containing Region, Load Info]
+     */
     fun getNodeLoad(): List<NodeLoadResponseDto> {
         return nodeRepository.findAll().stream()
                 .map {NodeLoadResponseDto(it)}
                 .collect(Collectors.toList())
     }
 
+    /**
+     * save(param dto): Save Node Information[Register] to db.
+     * this function will check whether node api server is actually running and save it to actual db.
+     *
+     * returns: A String, containing Region Number[id]
+     * returns: A String, containing "Error"
+     */
     fun save(nodeSaveRequestDto: NodeSaveRequestDto): String {
+        // Convert DTO to Entity
         val node: Node = nodeSaveRequestDto.toEntity()
+
+        // Set Region Name based on db's count
         node.regionName = "Region-${nodeRepository.count()}"
 
+        // Find Any duplicated registered node. - if duplicated node found, return "Error"
         val nodeGot: Node = nodeRepository.findByIpAddress(node.ipAddress) ?: Node(id = Long.MAX_VALUE, "", "", "", "")
         if (nodeGot.id != Long.MAX_VALUE) {
             return "Error"
@@ -66,6 +90,13 @@ class NodeService {
         }
     }
 
+    /**
+     * isNodeRunning(param dto): Check whether Specified compute node is actually working
+     * This function will call REST::GET API on compute-node server.
+     *
+     * returns: true - when node is actually working.
+     * returns: false - when any exception occurs[or internal server error].
+     */
     private fun isNodeRunning(nodeSaveRequestDto: NodeSaveRequestDto): Boolean {
         val restTemplate: RestTemplate = RestTemplate()
         val url: String = "http://${nodeSaveRequestDto.ipAddress}:${nodeSaveRequestDto.hostPort}/api/node/load"

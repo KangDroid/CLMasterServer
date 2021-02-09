@@ -14,8 +14,10 @@ class AdminApiController {
     private lateinit var nodeService: NodeService
 
     /**
-     * Register Compute Node
-     * returns Node Region else, "Error"
+     * registerNode(param dto): Register compute node specified on DTO to server.
+     * Calling this api will register node information[with verification] to master's node db.
+     * returns: A String, containing registered region.
+     * returns: A String, containing "Error"
      */
     @PostMapping("/api/admin/node/register")
     fun registerNode(@RequestBody nodeSaveRequestDto: NodeSaveRequestDto): String {
