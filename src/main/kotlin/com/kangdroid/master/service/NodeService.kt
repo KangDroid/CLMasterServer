@@ -1,6 +1,7 @@
 package com.kangdroid.master.service
 
 import com.kangdroid.master.data.docker.DockerImageRepository
+import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.Node
 import com.kangdroid.master.data.node.NodeRepository
@@ -25,31 +26,28 @@ class NodeService {
     /**
      * createContainer(param dto): Create Container in Compute Node's Server, with given DTO
      * Param: UserImageSaveRequestDto[id, password, docker-ID, compute-region]
-     * returns: A String, containing Docker container's ID
-     * returns: A String, containing "Error"
+     * returns: UserImageResponseDto - Containing Full information about container
+     * returns: UserImageResponseDto - Containing Error Message.
      */
-    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): String {
+    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): UserImageResponseDto {
         // Find Compute Node information given DTO - to register image on that container.
-        val node: Node = nodeRepository.findByRegionName(userImageSaveRequestDto.computeRegion) ?: return "Error"
+        val node: Node = nodeRepository.findByRegionName(userImageSaveRequestDto.computeRegion) ?: run {
+            return UserImageResponseDto(errorMessage = "Cannot find Compute Region!")
+        }
 
         // Request compute-node to create a fresh container
         val restTemplate: RestTemplate = RestTemplate()
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
-        val responseEntity: ResponseEntity<String> = try {
-            restTemplate.postForEntity(url, String::class.java)
+        val responseEntity: ResponseEntity<UserImageResponseDto> = try {
+            restTemplate.postForEntity(url, UserImageResponseDto::class.java)
         } catch (e: Exception) {
             println(e.stackTraceToString())
-            return "Error"
+            return UserImageResponseDto(errorMessage = "Cannot communicate with Compute node!")
         }
 
-        // Return values
-        return if (responseEntity.body != null) {
-            userImageSaveRequestDto.dockerId = responseEntity.body!!
-            dockerImageRepository.save(userImageSaveRequestDto.toEntity())
-            responseEntity.body!!
-        } else {
-            "Error"
-        }
+        return responseEntity.body?.also {
+            it.regionLocation = userImageSaveRequestDto.computeRegion
+        } ?: UserImageResponseDto(errorMessage = "Getting Response from Compute Node failed!")
     }
 
     /**

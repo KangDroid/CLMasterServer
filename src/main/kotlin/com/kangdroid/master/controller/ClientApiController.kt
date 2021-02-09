@@ -1,5 +1,6 @@
 package com.kangdroid.master.controller
 
+import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.service.NodeService
@@ -27,11 +28,11 @@ class ClientApiController {
     /**
      * registerUserDocker(param dto): Create User with Docker Image Creation
      * Basically calling this api will create an unique-docker image[with openssh enabled], with registering user.
-     * returns: A String, containing Docker Container ID
-     * returns: A String, containing "Error" for error.
+     * returns: UserImageResponseDto - Containing Full information about container
+     * returns: UserImageResponseDto - Containing Error Message.
      */
     @PostMapping("/api/client/register")
-    fun registerUserDocker(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto): String {
+    fun registerUserDocker(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto): UserImageResponseDto {
         return nodeService.createContainer(userImageSaveRequestDto)
     }
 }
