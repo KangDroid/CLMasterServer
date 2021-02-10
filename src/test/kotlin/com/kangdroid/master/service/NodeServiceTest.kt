@@ -22,6 +22,9 @@ class NodeServiceTest {
     @Autowired
     private lateinit var nodeRepository: NodeRepository
 
+    @Autowired
+    private lateinit var passwordEncryptorService: PasswordEncryptorService
+
     @After
     fun clearAllRepo() {
         nodeRepository.deleteAll()
@@ -67,5 +70,14 @@ class NodeServiceTest {
             assertThat(returnValue.regionName.length).isGreaterThan(0)
             assertThat(returnValue.regionName).isEqualTo("Region-${nodeRepository.count() - 1}")
         }
+    }
+
+    @Test
+    fun isEncryptingPasswordWell() {
+        // Let
+        val plainPassword: String = "testPassword"
+        val encodedPassword: String = passwordEncryptorService.encodePlainText(plainPassword)
+
+        assertThat(passwordEncryptorService.isMatching(plainPassword, encodedPassword)).isEqualTo(true)
     }
 }

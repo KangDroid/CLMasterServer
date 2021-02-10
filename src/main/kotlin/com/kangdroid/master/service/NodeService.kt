@@ -30,6 +30,9 @@ class NodeService {
     @Autowired
     private lateinit var dockerImageRepository: DockerImageRepository
 
+    @Autowired
+    private lateinit var passwordEncryptorService: PasswordEncryptorService
+
     /**
      * createContainer(param dto): Create Container in Compute Node's Server, with given DTO
      * Param: UserImageSaveRequestDto[id, password, docker-ID, compute-region]
@@ -57,7 +60,7 @@ class NodeService {
 
         dockerImageRepository.save(DockerImage(
                 userName = userImageSaveRequestDto.userName,
-                userPassword = userImageSaveRequestDto.userPassword,
+                userPassword = passwordEncryptorService.encodePlainText(userImageSaveRequestDto.userPassword),
                 dockerId = userImageResponseDto.containerId,
                 computeRegion = userImageResponseDto.regionLocation
         ))
