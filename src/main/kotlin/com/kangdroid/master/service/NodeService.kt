@@ -12,6 +12,7 @@ import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
@@ -98,7 +99,7 @@ class NodeService {
         return if (isNodeRunning(nodeSaveRequestDto)) {
             NodeSaveResponseDto(nodeRepository.save(node))
         } else {
-            NodeSaveResponseDto(errorMessage = "Node Server is NOT Running. Check IP Address/Server Port")
+            NodeSaveResponseDto(errorMessage = "Node Server is NOT Running[Timeout]. Check IP Address/Server Port.")
         }
     }
 
@@ -110,7 +111,12 @@ class NodeService {
      * returns: false - when any exception occurs[or internal server error].
      */
     private fun isNodeRunning(nodeSaveRequestDto: NodeSaveRequestDto): Boolean {
-        val restTemplate: RestTemplate = RestTemplate()
+        // Set Connection Timeout
+        val clientRequestFactory: HttpComponentsClientHttpRequestFactory = HttpComponentsClientHttpRequestFactory().also {
+            it.setConnectTimeout(5 * 1000)
+            it.setReadTimeout(5 * 1000)
+        }
+        val restTemplate: RestTemplate = RestTemplate(clientRequestFactory)
         val url: String = "http://${nodeSaveRequestDto.ipAddress}:${nodeSaveRequestDto.hostPort}/api/node/load"
         val responseEntity: ResponseEntity<String> = try {
             restTemplate.getForEntity(url, String::class.java)
