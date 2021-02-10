@@ -28,10 +28,10 @@ class NodeService {
     private lateinit var nodeRepository: NodeRepository
 
     @Autowired
-    private lateinit var dockerImageRepository: DockerImageRepository
+    private lateinit var passwordEncryptorService: PasswordEncryptorService
 
     @Autowired
-    private lateinit var passwordEncryptorService: PasswordEncryptorService
+    private lateinit var dockerImageService: DockerImageService
 
     /**
      * createContainer(param dto): Create Container in Compute Node's Server, with given DTO
@@ -58,12 +58,16 @@ class NodeService {
             it.regionLocation = userImageSaveRequestDto.computeRegion
         } ?: UserImageResponseDto(errorMessage = "Getting Response from Compute Node failed!")
 
-        dockerImageRepository.save(DockerImage(
+        // Save back to dockerImage DBData
+        val checkResponse: String = dockerImageService.saveWithCheck(DockerImage(
                 userName = userImageSaveRequestDto.userName,
                 userPassword = passwordEncryptorService.encodePlainText(userImageSaveRequestDto.userPassword),
                 dockerId = userImageResponseDto.containerId,
                 computeRegion = userImageResponseDto.regionLocation
         ))
+        if (checkResponse != "") {
+            return UserImageResponseDto(errorMessage = checkResponse)
+        }
 
         return userImageResponseDto
     }
