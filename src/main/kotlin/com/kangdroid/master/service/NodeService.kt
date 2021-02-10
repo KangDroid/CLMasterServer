@@ -6,6 +6,7 @@ import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.Node
 import com.kangdroid.master.data.node.NodeRepository
+import com.kangdroid.master.data.node.dto.NodeAliveResponseDto
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
@@ -32,6 +33,11 @@ class NodeService {
 
     @Autowired
     private lateinit var dockerImageService: DockerImageService
+
+    inner class Cause(
+            var value: Boolean,
+            var cause: String
+    )
 
     /**
      * createContainer(param dto): Create Container in Compute Node's Server, with given DTO
@@ -103,10 +109,12 @@ class NodeService {
         }
 
         // Check for node integrity
-        return if (isNodeRunning(nodeSaveRequestDto)) {
-            NodeSaveResponseDto(nodeRepository.save(node))
+        val result: Cause = isNodeRunning(nodeSaveRequestDto)
+
+        return if (result.cause.isNotEmpty()) {
+            NodeSaveResponseDto(errorMessage = result.cause)
         } else {
-            NodeSaveResponseDto(errorMessage = "Node Server is NOT Running[Timeout]. Check IP Address/Server Port.")
+            NodeSaveResponseDto(nodeRepository.save(node))
         }
     }
 
@@ -117,21 +125,25 @@ class NodeService {
      * returns: true - when node is actually working.
      * returns: false - when any exception occurs[or internal server error].
      */
-    private fun isNodeRunning(nodeSaveRequestDto: NodeSaveRequestDto): Boolean {
+    private fun isNodeRunning(nodeSaveRequestDto: NodeSaveRequestDto): Cause {
         // Set Connection Timeout
         val clientRequestFactory: HttpComponentsClientHttpRequestFactory = HttpComponentsClientHttpRequestFactory().also {
             it.setConnectTimeout(5 * 1000)
             it.setReadTimeout(5 * 1000)
         }
         val restTemplate: RestTemplate = RestTemplate(clientRequestFactory)
-        val url: String = "http://${nodeSaveRequestDto.ipAddress}:${nodeSaveRequestDto.hostPort}/api/node/load"
-        val responseEntity: ResponseEntity<String> = try {
-            restTemplate.getForEntity(url, String::class.java)
+        val url: String = "http://${nodeSaveRequestDto.ipAddress}:${nodeSaveRequestDto.hostPort}/api/alive"
+        val responseEntity: ResponseEntity<NodeAliveResponseDto> = try {
+            restTemplate.getForEntity(url, NodeAliveResponseDto::class.java)
         } catch (e: Exception) {
             println(e.stackTraceToString())
-            return false
+            return Cause(value = false, cause = "Connecting to Node Server failed. Check for IP/Port again.")
         }
+        val response: NodeAliveResponseDto = responseEntity.body
+                ?: return Cause(value = false, cause = "Node Alive Response is SHOULD NOT BE NULL!")
 
-        return (responseEntity.statusCode == HttpStatus.OK)
+        return Cause(value = ((responseEntity.statusCode == HttpStatus.OK) && (response.isDockerServerRunning)),
+                cause = response.errorMessage
+        )
     }
 }
