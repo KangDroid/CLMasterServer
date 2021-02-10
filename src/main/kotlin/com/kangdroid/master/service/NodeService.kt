@@ -8,6 +8,7 @@ import com.kangdroid.master.data.node.Node
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
+import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -77,10 +78,10 @@ class NodeService {
      * save(param dto): Save Node Information[Register] to db.
      * this function will check whether node api server is actually running and save it to actual db.
      *
-     * returns: A String, containing Region Number[id]
-     * returns: A String, containing "Error"
+     * returns: A NodeSaveResponseDto, containing Node Information
+     * returns: A NodeSaveResponseDto, containing errorMessage.
      */
-    fun save(nodeSaveRequestDto: NodeSaveRequestDto): String {
+    fun save(nodeSaveRequestDto: NodeSaveRequestDto): NodeSaveResponseDto {
         // Convert DTO to Entity
         val node: Node = nodeSaveRequestDto.toEntity()
 
@@ -90,14 +91,14 @@ class NodeService {
         // Find Any duplicated registered node. - if duplicated node found, return "Error"
         val nodeGot: Node = nodeRepository.findByIpAddress(node.ipAddress) ?: Node(id = Long.MAX_VALUE, "", "", "", "")
         if (nodeGot.id != Long.MAX_VALUE) {
-            return "Error"
+            return NodeSaveResponseDto(errorMessage = "Duplicated Compute Node is found on IP Address: ${node.ipAddress}")
         }
 
         // Check for node integrity
         return if (isNodeRunning(nodeSaveRequestDto)) {
-            nodeRepository.save(node).regionName
+            NodeSaveResponseDto(nodeRepository.save(node))
         } else {
-            "Error"
+            NodeSaveResponseDto(errorMessage = "Node Server is NOT Running. Check IP Address/Server Port")
         }
     }
 
