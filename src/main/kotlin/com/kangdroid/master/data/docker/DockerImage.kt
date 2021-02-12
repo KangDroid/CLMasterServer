@@ -18,5 +18,8 @@ class DockerImage(
         var dockerId: String,
 
         @Column(length = 500, nullable = false)
-        var computeRegion: String
+        var computeRegion: String,
+
+        @Column(length = 500, nullable = true)
+        var userToken: String = ""
 )

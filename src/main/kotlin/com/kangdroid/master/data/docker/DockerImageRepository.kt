@@ -10,4 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 interface DockerImageRepository: JpaRepository<DockerImage, Long> {
     @Transactional(readOnly = true)
     fun findByUserName(input: String): DockerImage?
+
+    @Transactional(readOnly = true)
+    fun findByUserPassword(input: String): DockerImage?
 }
