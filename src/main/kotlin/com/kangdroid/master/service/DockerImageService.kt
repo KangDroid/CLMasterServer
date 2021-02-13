@@ -7,7 +7,9 @@ import com.kangdroid.master.data.docker.dto.UserImageLoginResponseDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
+import java.util.*
 import javax.xml.bind.DatatypeConverter
+import kotlin.concurrent.schedule
 
 @Service
 class DockerImageService {
@@ -16,6 +18,12 @@ class DockerImageService {
 
     @Autowired
     private lateinit var passwordEncryptorService: PasswordEncryptorService
+
+    // Timer Class
+    private val timer: Timer = Timer()
+
+    // Token Expiration Time in Milliseconds
+    private val tokenExpireTime: Long = 1000 * 60 // 60s
 
     /**
      * saveWithCheck(param entity): Save User DB with checking duplication
@@ -46,6 +54,17 @@ class DockerImageService {
         return if (passwordEncryptorService.isMatching(userImageLoginRequestDto.userPassword, dockerImage.userPassword)) {
             // Create Token
             dockerImage.userToken = createToken(dockerImage, ip)
+            dockerImage.userTokenExp = System.currentTimeMillis() + tokenExpireTime
+
+            // Expiration Task
+            timer.schedule(Date(dockerImage.userTokenExp)) {
+                println("Token Expired!")
+                dockerImage.userToken = ""
+                dockerImage.userTokenExp = 0
+                dockerImageRepository.save(dockerImage)
+            }
+
+            // Anyway - Edit Db[Save Token]
             dockerImageRepository.save(dockerImage) // edit db
             UserImageLoginResponseDto(token = dockerImage.userToken)
         } else {
