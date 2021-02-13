@@ -45,10 +45,12 @@ class UserService {
     fun saveWithCheck(token: String, userImageResponseDto: UserImageResponseDto): String {
         val user: User = userRepository.findByUserToken(token)
             ?: return "Cannot Find User. Please Re-Login"
-        user.dockerImage = DockerImage(
+
+        user.dockerImage?.add(DockerImage(
+            id = 0,
             dockerId = userImageResponseDto.containerId,
             computeRegion = userImageResponseDto.regionLocation
-        )
+        ))
 
         userRepository.save(user)
         return ""

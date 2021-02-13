@@ -21,7 +21,7 @@ class User(
     @Column(length = 500, nullable = true)
     var userTokenExp: Long = 0,
 
-    @Embedded
-    @Column(length = 500, nullable = true)
-    var dockerImage: DockerImage? = null
+    @OneToMany(fetch=FetchType.EAGER, cascade = [CascadeType.ALL])
+    @JoinColumn(name = "docker_id")
+    var dockerImage: MutableList<DockerImage>? = null
 )
