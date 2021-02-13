@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
 import java.util.*
+import javax.annotation.PreDestroy
 import javax.xml.bind.DatatypeConverter
 import kotlin.concurrent.schedule
 
@@ -24,6 +25,12 @@ class DockerImageService {
 
     // Token Expiration Time in Milliseconds
     private val tokenExpireTime: Long = 1000 * 60 // 60s
+
+    @PreDestroy
+    fun clearTime() {
+        timer.cancel()
+        timer.purge()
+    }
 
     /**
      * saveWithCheck(param entity): Save User DB with checking duplication
