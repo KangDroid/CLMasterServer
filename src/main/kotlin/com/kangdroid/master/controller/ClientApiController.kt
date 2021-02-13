@@ -2,7 +2,11 @@ package com.kangdroid.master.controller
 
 import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
-import com.kangdroid.master.service.DockerImageService
+import com.kangdroid.master.data.user.dto.UserLoginRequestDto
+import com.kangdroid.master.data.user.dto.UserLoginResponseDto
+import com.kangdroid.master.data.user.dto.UserRegisterDto
+import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.service.UserService
 import com.kangdroid.master.service.NodeService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,7 +24,7 @@ class ClientApiController {
     private lateinit var nodeService: NodeService
 
     @Autowired
-    private lateinit var dockerImageService: DockerImageService
+    private lateinit var userService: UserService
 
     /**
      * getNodeLoad(): Get All of Registered Node Load as List.
@@ -32,23 +36,35 @@ class ClientApiController {
     }
 
     /**
-     * registerUserDocker(param dto): Create User with Docker Image Creation
-     * Basically calling this api will create an unique-docker image[with openssh enabled], with registering user.
-     * returns: UserImageResponseDto - Containing Full information about container
-     * returns: UserImageResponseDto - Containing Error Message.
+     * createContainer(param userImageSaveRequestDto): Create Container with appropriate Token
+     * returns: UserImageResponseDto with IP/Port/ContainerID/Location
+     * returns: UserImageResponseDto with errorMessage.
      */
-    @PostMapping("/api/client/register")
-    fun registerUserDocker(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto): UserImageResponseDto {
+    @PostMapping("/api/client/node/create")
+    fun createContainer(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto): UserImageResponseDto {
+        if (!userService.checkToken(userImageSaveRequestDto))
+            return UserImageResponseDto(errorMessage = "Token is Invalid. Please Re-Login")
+
         return nodeService.createContainer(userImageSaveRequestDto)
     }
 
+    /**
+     * registerUser(param userRegisterDto): Create an user with given id/pw
+     * Returns: Registered Id with userRegisterResponseDto
+     * Returns: errorMessage With userRegisterResponseDto
+     */
+    @PostMapping("/api/client/register")
+    fun registerUser(@RequestBody userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
+        return userService.registerUser(userRegisterDto)
+    }
+
     @PostMapping("/api/client/login")
-    fun loginUser(@RequestBody userImageLoginRequestDto: UserImageLoginRequestDto): UserImageLoginResponseDto {
+    fun loginUser(@RequestBody userImageLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {
         val servletRequest: HttpServletRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
         var fromIp: String? = servletRequest.getHeader("X-FORWARDED-FOR")
         if (fromIp == null) {
             fromIp = servletRequest.remoteAddr
         }
-        return dockerImageService.login(userImageLoginRequestDto, fromIp!!)
+        return userService.login(userImageLoginRequestDto, fromIp!!)
     }
 }

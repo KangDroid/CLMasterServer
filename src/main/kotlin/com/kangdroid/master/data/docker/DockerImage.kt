@@ -2,27 +2,8 @@ package com.kangdroid.master.data.docker
 
 import javax.persistence.*
 
-@Entity
+@Embeddable
 class DockerImage(
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long = Long.MAX_VALUE,
-
-        @Column(length = 500, nullable = false)
-        var userName: String,
-
-        @Column(length = 500, nullable = false)
-        var userPassword: String,
-
-        @Column(length = 500, nullable = false)
         var dockerId: String,
-
-        @Column(length = 500, nullable = false)
         var computeRegion: String,
-
-        @Column(length = 500, nullable = true)
-        var userToken: String = "",
-
-        @Column(length = 500, nullable = true)
-        var userTokenExp: Long = 0
 )

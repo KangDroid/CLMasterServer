@@ -1,7 +1,6 @@
 package com.kangdroid.master.service
 
 import com.kangdroid.master.data.docker.DockerImage
-import com.kangdroid.master.data.docker.DockerImageRepository
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.Node
@@ -18,10 +17,6 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 import java.util.stream.Collectors
-import javax.persistence.Column
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
 
 @Service
 class NodeService {
@@ -32,7 +27,7 @@ class NodeService {
     private lateinit var passwordEncryptorService: PasswordEncryptorService
 
     @Autowired
-    private lateinit var dockerImageService: DockerImageService
+    private lateinit var userService: UserService
 
     inner class Cause(
             var value: Boolean,
@@ -65,12 +60,8 @@ class NodeService {
         } ?: UserImageResponseDto(errorMessage = "Getting Response from Compute Node failed!")
 
         // Save back to dockerImage DBData
-        val checkResponse: String = dockerImageService.saveWithCheck(DockerImage(
-                userName = userImageSaveRequestDto.userName,
-                userPassword = passwordEncryptorService.encodePlainText(userImageSaveRequestDto.userPassword),
-                dockerId = userImageResponseDto.containerId,
-                computeRegion = userImageResponseDto.regionLocation
-        ))
+        val checkResponse: String = userService.saveWithCheck(userImageSaveRequestDto.userToken, userImageResponseDto)
+
         if (checkResponse != "") {
             return UserImageResponseDto(errorMessage = checkResponse)
         }
