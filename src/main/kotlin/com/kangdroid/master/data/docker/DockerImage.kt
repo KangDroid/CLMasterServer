@@ -1,9 +1,9 @@
 package com.kangdroid.master.data.docker
 
+import com.kangdroid.master.data.user.User
 import javax.persistence.*
 
 @Entity
-@Table(name = "TESTING")
 class DockerImage(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,6 +11,10 @@ class DockerImage(
 
         @Column(name = "docker_id", length = 500, nullable = false)
         var dockerId: String,
+
+        @ManyToOne
+        @JoinColumn(name = "user_id", nullable = false)
+        var user: User,
 
         @Column(length = 500, nullable = false)
         var computeRegion: String,

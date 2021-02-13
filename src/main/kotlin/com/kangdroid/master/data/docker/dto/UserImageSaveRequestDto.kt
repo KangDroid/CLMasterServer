@@ -19,11 +19,4 @@ class UserImageSaveRequestDto(
         var userToken: String,
         var dockerId: String = "",
         var computeRegion: String
-) {
-    fun toEntity() : DockerImage {
-        return DockerImage(
-                dockerId = dockerId,
-                computeRegion = computeRegion
-        )
-    }
-}
+)

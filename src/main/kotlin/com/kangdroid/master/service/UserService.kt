@@ -46,14 +46,24 @@ class UserService {
         val user: User = userRepository.findByUserToken(token)
             ?: return "Cannot Find User. Please Re-Login"
 
-        user.dockerImage?.add(DockerImage(
-            id = 0,
+        user.dockerImage.add(DockerImage(
             dockerId = userImageResponseDto.containerId,
-            computeRegion = userImageResponseDto.regionLocation
+            computeRegion = userImageResponseDto.regionLocation,
+            user = user
         ))
-
         userRepository.save(user)
         return ""
+    }
+
+    fun testing() {
+        val userList: List<User> = userRepository.findAll()
+
+        for (tmpUser in userList) {
+            println("User: ${tmpUser.userName}")
+            for (tmpList in tmpUser.dockerImage) {
+                println(tmpList.dockerId)
+            }
+        }
     }
 
     /**
