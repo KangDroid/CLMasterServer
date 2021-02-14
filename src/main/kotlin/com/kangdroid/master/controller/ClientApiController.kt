@@ -36,6 +36,12 @@ class ClientApiController {
     }
 
     /**
+     * isMasterServerAlive(): Check whether master server is alive[for client-request]
+     */
+    @GetMapping("/api/client/alive")
+    fun isMasterServerAlive(): Boolean = true
+
+    /**
      * createContainer(param userImageSaveRequestDto): Create Container with appropriate Token
      * returns: UserImageResponseDto with IP/Port/ContainerID/Location
      * returns: UserImageResponseDto with errorMessage.
