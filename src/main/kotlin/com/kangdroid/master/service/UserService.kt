@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import javax.annotation.PreDestroy
 import javax.xml.bind.DatatypeConverter
 import kotlin.concurrent.schedule
@@ -30,6 +32,9 @@ class UserService {
 
     // Token Expiration Time in Milliseconds
     private val tokenExpireTime: Long = 1000 * 60 * 3 // 60s
+
+    // HashMap for token
+    private val tokenHashMap: ConcurrentMap<String, TimerTask> = ConcurrentHashMap()
 
     @PreDestroy
     fun clearTime() {
@@ -114,7 +119,7 @@ class UserService {
             user.userTokenExp = System.currentTimeMillis() + tokenExpireTime
 
             // Expiration Task
-            timer.schedule(Date(user.userTokenExp)) {
+            tokenHashMap[user.userToken] = timer.schedule(Date(user.userTokenExp)) {
                 println("Token Expired!")
                 user.userToken = ""
                 user.userTokenExp = 0
