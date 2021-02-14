@@ -114,6 +114,20 @@ class UserService {
 
         // 2. Check whether requested PW equals DB's Password
         return if (passwordEncryptorService.isMatching(userLoginRequestDto.userPassword, user.userPassword)) {
+
+            // Token Already Exists, invalidate current token and re-register token.
+            if (user.userToken != "") {
+                // Cancel Scheduled Job first
+                if (tokenHashMap.containsKey(user.userToken)) {
+                    tokenHashMap[user.userToken]!!.cancel()
+                } else {
+                    println("TimerTask Does not exists for token: ${user.userToken}")
+                }
+
+                // invalidate
+                user.userToken = ""
+            }
+
             // Create Token
             user.userToken = createToken(user, ip)
             user.userTokenExp = System.currentTimeMillis() + tokenExpireTime
