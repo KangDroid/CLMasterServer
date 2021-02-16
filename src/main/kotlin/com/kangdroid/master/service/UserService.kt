@@ -1,14 +1,12 @@
 package com.kangdroid.master.service
 
 import com.kangdroid.master.data.docker.DockerImage
+import com.kangdroid.master.data.docker.dto.UserImageListResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
-import com.kangdroid.master.data.user.dto.UserLoginRequestDto
-import com.kangdroid.master.data.user.dto.UserLoginResponseDto
-import com.kangdroid.master.data.user.dto.UserRegisterDto
-import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.data.user.dto.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
@@ -69,6 +67,30 @@ class UserService {
                 println(tmpList.dockerId)
             }
         }
+    }
+
+    /**
+     * ListNode(param token): List User's Node information.
+     * Returns Zero or more lists of nodes
+     * Returns One DTO with errorMessage.
+     */
+    fun listNode(userImageListRequestDto: UserImageListRequestDto): List<UserImageListResponseDto> {
+        val user: User = userRepository.findByUserToken(userImageListRequestDto.userToken)
+            ?: return listOf(
+                UserImageListResponseDto("", "", "Cannot Find User. Please Re-Login")
+            )
+
+        val mutableImageList: MutableList<UserImageListResponseDto> = mutableListOf()
+        for (dockerImage in user.dockerImage) {
+            mutableImageList.add(
+                UserImageListResponseDto(
+                    dockerId = dockerImage.dockerId,
+                    computeRegion = dockerImage.computeRegion
+                )
+            )
+        }
+
+        return mutableImageList.toList()
     }
 
     /**

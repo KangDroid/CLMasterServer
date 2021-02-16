@@ -2,10 +2,7 @@ package com.kangdroid.master.controller
 
 import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
-import com.kangdroid.master.data.user.dto.UserLoginRequestDto
-import com.kangdroid.master.data.user.dto.UserLoginResponseDto
-import com.kangdroid.master.data.user.dto.UserRegisterDto
-import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.data.user.dto.*
 import com.kangdroid.master.service.UserService
 import com.kangdroid.master.service.NodeService
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,6 +37,14 @@ class ClientApiController {
      */
     @GetMapping("/api/client/alive")
     fun isMasterServerAlive(): Boolean = true
+
+    /**
+     * getNodeListUser(param token) Get List of node for corresponding user.
+     */
+    @GetMapping("/api/client/node")
+    fun getNodeListUser(@RequestBody userImageListRequestDto: UserImageListRequestDto): List<UserImageListResponseDto> {
+        return userService.listNode(userImageListRequestDto)
+    }
 
     /**
      * createContainer(param userImageSaveRequestDto): Create Container with appropriate Token
