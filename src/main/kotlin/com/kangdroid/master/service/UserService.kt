@@ -77,13 +77,14 @@ class UserService {
     fun listNode(userImageListRequestDto: UserImageListRequestDto): List<UserImageListResponseDto> {
         val user: User = userRepository.findByUserToken(userImageListRequestDto.userToken)
             ?: return listOf(
-                UserImageListResponseDto("", "", "Cannot Find User. Please Re-Login")
+                UserImageListResponseDto("", "", "", "Cannot Find User. Please Re-Login")
             )
 
         val mutableImageList: MutableList<UserImageListResponseDto> = mutableListOf()
         for (dockerImage in user.dockerImage) {
             mutableImageList.add(
                 UserImageListResponseDto(
+                    userName = user.userName,
                     dockerId = dockerImage.dockerId,
                     computeRegion = dockerImage.computeRegion
                 )
