@@ -43,6 +43,9 @@ class ClientApiController {
      */
     @GetMapping("/api/client/node")
     fun getNodeListUser(@RequestBody userImageListRequestDto: UserImageListRequestDto): List<UserImageListResponseDto> {
+        if (!userService.checkToken(userImageListRequestDto.userToken)) {
+            return listOf<UserImageListResponseDto>(UserImageListResponseDto(errorMessage = "Token is Invalid. Please Re-Login"))
+        }
         return userService.listNode(userImageListRequestDto)
     }
 
