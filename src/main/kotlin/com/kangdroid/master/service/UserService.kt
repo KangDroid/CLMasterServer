@@ -88,8 +88,8 @@ class UserService {
      * Returns: True when token is valid
      * Returns: False when token is invalid
      */
-    fun checkToken(userImageSaveRequestDto: UserImageSaveRequestDto): Boolean {
-        return (userRepository.findByUserToken(userImageSaveRequestDto.userToken) != null)
+    fun checkToken(token: String): Boolean {
+        return (userRepository.findByUserToken(token) != null)
     }
 
     /**

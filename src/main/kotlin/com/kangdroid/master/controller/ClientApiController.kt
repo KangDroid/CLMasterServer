@@ -53,7 +53,7 @@ class ClientApiController {
      */
     @PostMapping("/api/client/node/create")
     fun createContainer(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto): UserImageResponseDto {
-        if (!userService.checkToken(userImageSaveRequestDto))
+        if (!userService.checkToken(userImageSaveRequestDto.userToken))
             return UserImageResponseDto(errorMessage = "Token is Invalid. Please Re-Login")
 
         return nodeService.createContainer(userImageSaveRequestDto)

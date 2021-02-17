@@ -122,15 +122,11 @@ class UserServiceTest {
 
         // CheckToken
         assertThat(userService.checkToken(
-            UserImageSaveRequestDto(
-                loginResponse.token, "", ""
-            )
+            loginResponse.token
         )).isEqualTo(true)
 
         assertThat(userService.checkToken(
-            UserImageSaveRequestDto(
-                "loginResponse.token", "", ""
-            )
+            "loginResponse.token"
         )).isEqualTo(false)
     }
 }
