@@ -58,17 +58,6 @@ class UserService {
         return ""
     }
 
-    fun testing() {
-        val userList: List<User> = userRepository.findAll()
-
-        for (tmpUser in userList) {
-            println("User: ${tmpUser.userName}")
-            for (tmpList in tmpUser.dockerImage) {
-                println(tmpList.dockerId)
-            }
-        }
-    }
-
     /**
      * ListNode(param token): List User's Node information.
      * Returns Zero or more lists of nodes
