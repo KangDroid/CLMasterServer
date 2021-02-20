@@ -95,12 +95,8 @@ class NodeService {
             return "Cannot communicate with Compute node!"
         }
 
-        if (!responseEntity.hasBody()) {
-            return "Cannot communicate with Compute Node!"
-        } else {
-            if (responseEntity.body != "") {
-                return "Error Occurred when communicating compute node!"
-            }
+        if (responseEntity.hasBody()) {
+            return responseEntity.body!!
         }
 
         return ""
