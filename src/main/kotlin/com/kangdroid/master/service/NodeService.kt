@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 import java.util.stream.Collectors
@@ -67,6 +69,39 @@ class NodeService {
         }
 
         return userImageResponseDto
+    }
+
+    /**
+     * restartContainer: Restart Container given Docker Image
+     */
+    fun restartContainer(dockerImage: DockerImage): String {
+        val node: Node = nodeRepository.findByRegionName(dockerImage.computeRegion)
+            ?: return "Cannot find Compute Region!"
+
+        // Request compute-node to create a fresh container
+        val restTemplate: RestTemplate = RestTemplate()
+        val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/restart"
+
+        // Set Parameter[Use Multivalue since we are not global-fying dto object]
+        val parameters: MultiValueMap<String, String> = LinkedMultiValueMap()
+        parameters.add("containerId", dockerImage.dockerId)
+
+        val responseEntity: ResponseEntity<String> = try {
+            restTemplate.postForEntity(url, parameters, String::class.java)
+        } catch (e: Exception) {
+            println(e.stackTraceToString())
+            return "Cannot communicate with Compute node!"
+        }
+
+        if (!responseEntity.hasBody()) {
+            return "Cannot communicate with Compute Node!"
+        } else {
+            if (responseEntity.body != "") {
+                return "Error Occurred when communicating compute node!"
+            }
+        }
+
+        return ""
     }
 
     /**

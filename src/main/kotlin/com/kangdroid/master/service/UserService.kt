@@ -1,9 +1,7 @@
 package com.kangdroid.master.service
 
 import com.kangdroid.master.data.docker.DockerImage
-import com.kangdroid.master.data.docker.dto.UserImageListResponseDto
-import com.kangdroid.master.data.docker.dto.UserImageResponseDto
-import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
+import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.*
@@ -24,6 +22,9 @@ class UserService {
 
     @Autowired
     private lateinit var passwordEncryptorService: PasswordEncryptorService
+
+    @Autowired
+    private lateinit var nodeService: NodeService
 
     // Timer Class
     private val timer: Timer = Timer()
@@ -182,6 +183,25 @@ class UserService {
             it.update(input.toByteArray())
         }
         return DatatypeConverter.printHexBinary(messageDigest.digest())
+    }
+
+    /**
+     * RestartContainer(): Restart Corresponding Container
+     */
+    fun restartContainer(userRestartRequestDto: UserRestartRequestDto) : UserRestartResponseDto {
+        val user: User = userRepository.findByUserToken(userRestartRequestDto.userToken)
+            ?: return UserRestartResponseDto(errorMessage = "Cannot find user with token!")
+        val dockerImageList: MutableList<DockerImage> = user.dockerImage
+        val targetDockerImage: DockerImage = dockerImageList.find {
+            it.dockerId == userRestartRequestDto.containerId
+        } ?: return UserRestartResponseDto(errorMessage = "Cannot find container ID!")
+
+        val errorMessage: String = nodeService.restartContainer(targetDockerImage)
+        if (errorMessage.isNotEmpty()) {
+            return UserRestartResponseDto(errorMessage = errorMessage)
+        }
+
+        return UserRestartResponseDto()
     }
 
     /**

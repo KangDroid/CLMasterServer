@@ -81,4 +81,15 @@ class ClientApiController {
         }
         return userService.login(userImageLoginRequestDto, fromIp!!)
     }
+
+    /**
+     * restartContainerNode(): Restart User's Container
+     */
+    @PostMapping("/api/client/restart")
+    fun restartContainerNode(@RequestBody userRestartRequestDto: UserRestartRequestDto): UserRestartResponseDto {
+        if (!userService.checkToken(userRestartRequestDto.userToken))
+            return UserRestartResponseDto(errorMessage = "Token is Invalid. Please Re-Login")
+
+        return userService.restartContainer(userRestartRequestDto)
+    }
 }
