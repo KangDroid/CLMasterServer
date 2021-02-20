@@ -83,11 +83,13 @@ class NodeService {
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/restart"
 
         // Set Parameter[Use Multivalue since we are not global-fying dto object]
-        val parameters: MultiValueMap<String, String> = LinkedMultiValueMap()
-        parameters.add("containerId", dockerImage.dockerId)
+        class restartRequestDto(
+            var containerId: String
+        )
+        val requestDto: restartRequestDto = restartRequestDto(dockerImage.dockerId)
 
         val responseEntity: ResponseEntity<String> = try {
-            restTemplate.postForEntity(url, parameters, String::class.java)
+            restTemplate.postForEntity(url, requestDto, String::class.java)
         } catch (e: Exception) {
             println(e.stackTraceToString())
             return "Cannot communicate with Compute node!"
