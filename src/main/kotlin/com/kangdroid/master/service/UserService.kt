@@ -203,13 +203,4 @@ class UserService {
 
         return UserRestartResponseDto()
     }
-
-    /**
-     * isDuplicateIDExists(param id): Check whether duplicate ID exists with param id.
-     * Returns: True when duplicated ID exists
-     * Returns: False when it is new ID
-     */
-    private fun isDuplicateIDExists(userId: String): Boolean {
-        return (userRepository.findByUserName(userId) != null)
-    }
 }
