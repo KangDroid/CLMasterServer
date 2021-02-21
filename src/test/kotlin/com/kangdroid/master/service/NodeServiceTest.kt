@@ -161,5 +161,6 @@ class NodeServiceTest {
         userImageSaveRequestDto.computeRegion = ""
         userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
         assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot find Compute Region!")
+        userImageSaveRequestDto.computeRegion = returnValue.regionName // restore region
     }
 }
