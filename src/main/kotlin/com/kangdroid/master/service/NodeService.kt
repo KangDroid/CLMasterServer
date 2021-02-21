@@ -38,8 +38,8 @@ class NodeService {
     @PostConstruct
     fun initRestTemplate() {
         val clientRequestFactory: HttpComponentsClientHttpRequestFactory = HttpComponentsClientHttpRequestFactory().also {
-            it.setConnectTimeout(5 * 1000)
-            it.setReadTimeout(5 * 1000)
+            it.setConnectTimeout(10 * 1000)
+            it.setReadTimeout(10 * 1000)
         }
         restTemplate = RestTemplate(clientRequestFactory)
     }
