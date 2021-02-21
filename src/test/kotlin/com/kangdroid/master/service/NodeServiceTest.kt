@@ -162,5 +162,11 @@ class NodeServiceTest {
         userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
         assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot find Compute Region!")
         userImageSaveRequestDto.computeRegion = returnValue.regionName // restore region
+
+        // do work[Failure: Wrong token somehow]
+        userImageSaveRequestDto.userToken = ""
+        userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+        assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
+        userImageSaveRequestDto.userToken = loginToken // restore token
     }
 }
