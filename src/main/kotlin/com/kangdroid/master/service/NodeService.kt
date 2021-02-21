@@ -145,7 +145,7 @@ class NodeService {
         // Check for node integrity
         val result: Cause = isNodeRunning(nodeSaveRequestDto)
 
-        return if (result.cause.isNotEmpty()) {
+        return if (result.cause.isNotEmpty() || result.value) {
             NodeSaveResponseDto(errorMessage = result.cause)
         } else {
             NodeSaveResponseDto(nodeRepository.save(node))
