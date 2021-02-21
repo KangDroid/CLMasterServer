@@ -2,6 +2,7 @@ package com.kangdroid.master.service
 
 import com.kangdroid.master.data.docker.DockerImage
 import com.kangdroid.master.data.docker.dto.UserImageListResponseDto
+import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
@@ -179,5 +180,19 @@ class UserServiceTest {
         assertThat(userService.checkToken(
             "loginResponse.token"
         )).isEqualTo(false)
+    }
+
+    @Test
+    fun isSavingWithCheckWorksWell() {
+        val loginToken: String = registerDemoUser()
+        val userImageResponseDto: UserImageResponseDto = UserImageResponseDto() // empty one
+
+        // With Correct Token
+        var responseString: String = userService.saveWithCheck(loginToken, userImageResponseDto)
+        assertThat(responseString).isEqualTo("")
+
+        // With Wrong Token
+        responseString = userService.saveWithCheck("", userImageResponseDto)
+        assertThat(responseString).isNotEqualTo("")
     }
 }
