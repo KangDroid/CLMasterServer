@@ -167,8 +167,7 @@ class NodeService {
             println(e.stackTraceToString())
             return Cause(value = false, cause = "Connecting to Node Server failed. Check for IP/Port again.")
         }
-        val response: NodeAliveResponseDto = responseEntity.body
-                ?: return Cause(value = false, cause = "Node Alive Response is SHOULD NOT BE NULL!")
+        val response: NodeAliveResponseDto = responseEntity.body!!
 
         return Cause(value = ((responseEntity.statusCode == HttpStatus.OK) && (response.isDockerServerRunning)),
                 cause = response.errorMessage
