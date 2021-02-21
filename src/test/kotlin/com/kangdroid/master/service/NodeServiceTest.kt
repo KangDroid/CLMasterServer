@@ -18,7 +18,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
+import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
+import org.springframework.web.client.RestTemplate
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
@@ -168,5 +177,15 @@ class NodeServiceTest {
         userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
         assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
         userImageSaveRequestDto.userToken = loginToken // restore token
+
+        // setup mock
+        val mockServer: MockRestServiceServer = MockRestServiceServer.bindTo(nodeService.restTemplate).build()
+        mockServer.expect(requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/image"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withServerError()) // Internal Error
+
+        // do work[Failure: Compute Node Error]
+        userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+        assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot communicate with Compute node!")
     }
 }
