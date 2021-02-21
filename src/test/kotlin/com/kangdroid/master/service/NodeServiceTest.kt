@@ -1,5 +1,6 @@
 package com.kangdroid.master.service
 
+import com.kangdroid.master.config.TestConfiguration
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
@@ -24,6 +25,9 @@ class NodeServiceTest {
 
     @Autowired
     private lateinit var passwordEncryptorService: PasswordEncryptorService
+
+    @Autowired
+    private lateinit var testConfiguration: TestConfiguration
 
     @After
     fun clearAllRepo() {
@@ -58,18 +62,16 @@ class NodeServiceTest {
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
                 id = 10,
                 hostName = "testing",
-                hostPort = "8080",
-                ipAddress = "192.168.0.52"
+                hostPort = testConfiguration.computeNodeServerPort,
+                ipAddress = testConfiguration.computeNodeServerHostName
         )
 
         // do work
         val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
 
         // Assert
-        if (returnValue.errorMessage.isEmpty()) {
-            assertThat(returnValue.regionName.length).isGreaterThan(0)
-            assertThat(returnValue.regionName).isEqualTo("Region-${nodeRepository.count() - 1}")
-        }
+        assertThat(returnValue.regionName.length).isGreaterThan(0)
+        assertThat(returnValue.regionName).isEqualTo("Region-${nodeRepository.count() - 1}")
     }
 
     @Test
