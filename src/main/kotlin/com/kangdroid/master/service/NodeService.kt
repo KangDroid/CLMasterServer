@@ -33,7 +33,7 @@ class NodeService {
     private lateinit var userService: UserService
 
     // Global Rest Template
-    private lateinit var restTemplate: RestTemplate
+    lateinit var restTemplate: RestTemplate
 
     @PostConstruct
     fun initRestTemplate() {
