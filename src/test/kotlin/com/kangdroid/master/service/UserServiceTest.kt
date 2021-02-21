@@ -29,6 +29,28 @@ class UserServiceTest {
         userRepository.deleteAll()
     }
 
+    // Register Demo User for testing purpose.
+    // This should not assert!
+    fun registerDemoUser(): String {
+        // Register Operation
+        val userRegisterDto: UserRegisterDto = UserRegisterDto(
+            userName = "KangDroid",
+            userPassword = "TestingPassword"
+        )
+        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
+
+        // Trying Login
+        val loginResponse: UserLoginResponseDto = userService.login(
+            UserLoginRequestDto(
+                userName = userRegisterDto.userName,
+                userPassword = userRegisterDto.userPassword
+            ),
+            "127.0.0.1" // self loopback
+        )
+
+        return loginResponse.token
+    }
+
     @Test
     fun isRegisterWorkingWell() {
         val userRegisterDto: UserRegisterDto = UserRegisterDto(
@@ -111,32 +133,11 @@ class UserServiceTest {
 
     @Test
     fun isListingNodeWorksWell() {
-        // Register Operation
-        val userRegisterDto: UserRegisterDto = UserRegisterDto(
-            userName = "KangDroid",
-            userPassword = "TestingPassword"
-        )
-        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
-
-        // Check for ID Created well
-        assertThat(registerResponse.errorMessage).isEqualTo("")
-
-        // Trying Login
-        val loginResponse: UserLoginResponseDto = userService.login(
-            UserLoginRequestDto(
-                userName = userRegisterDto.userName,
-                userPassword = userRegisterDto.userPassword
-            ),
-            "127.0.0.1" // self loopback
-        )
-
-        // Login Assert
-        assertThat(loginResponse.errorMessage).isEqualTo("")
-        assertThat(loginResponse.token).isNotEqualTo("")
+        val loginToken = registerDemoUser()
 
         // Those above procedure was long, but register op.
         var responseList: List<UserImageListResponseDto> = userService.listNode(UserImageListRequestDto(
-            loginResponse.token
+            loginToken
         ))
 
         // There should be no list at all, because there is no registered container though.
@@ -150,7 +151,7 @@ class UserServiceTest {
         assertThat(responseList[0].errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
 
         // With Some dummy image
-        val user: User? = userRepository.findByUserToken(loginResponse.token)
+        val user: User? = userRepository.findByUserToken(loginToken)
         assertThat(user).isNotEqualTo(null)
         user!!.dockerImage.add(DockerImage(
             dockerId = "",
@@ -160,7 +161,7 @@ class UserServiceTest {
         userRepository.save(user)
 
         responseList = userService.listNode(UserImageListRequestDto(
-            loginResponse.token
+            loginToken
         ))
         assertThat(responseList.size).isEqualTo(1)
         assertThat(responseList[0].errorMessage).isEqualTo("")
@@ -168,32 +169,11 @@ class UserServiceTest {
 
     @Test
     fun isCheckingTokenWorksWell() {
-        // Register Operation
-        val userRegisterDto: UserRegisterDto = UserRegisterDto(
-            userName = "KangDroid",
-            userPassword = "TestingPassword"
-        )
-        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
-
-        // Check for ID Created well
-        assertThat(registerResponse.errorMessage).isEqualTo("")
-
-        // Trying Login
-        val loginResponse: UserLoginResponseDto = userService.login(
-            UserLoginRequestDto(
-                userName = userRegisterDto.userName,
-                userPassword = userRegisterDto.userPassword
-            ),
-            "127.0.0.1" // self loopback
-        )
-
-        // Login Assert
-        assertThat(loginResponse.errorMessage).isEqualTo("")
-        assertThat(loginResponse.token).isNotEqualTo("")
+        val loginToken: String = registerDemoUser()
 
         // CheckToken
         assertThat(userService.checkToken(
-            loginResponse.token
+            loginToken
         )).isEqualTo(true)
 
         assertThat(userService.checkToken(
