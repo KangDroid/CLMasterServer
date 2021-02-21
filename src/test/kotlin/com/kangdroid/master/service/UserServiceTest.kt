@@ -1,11 +1,11 @@
 package com.kangdroid.master.service
 
+import com.kangdroid.master.data.docker.DockerImage
+import com.kangdroid.master.data.docker.dto.UserImageListResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
+import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
-import com.kangdroid.master.data.user.dto.UserLoginRequestDto
-import com.kangdroid.master.data.user.dto.UserLoginResponseDto
-import com.kangdroid.master.data.user.dto.UserRegisterDto
-import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.data.user.dto.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
@@ -107,6 +107,63 @@ class UserServiceTest {
         )
         assertThat(loginResponse.errorMessage).isNotEqualTo("")
         assertThat(loginResponse.token).isEqualTo("")
+    }
+
+    @Test
+    fun isListingNodeWorksWell() {
+        // Register Operation
+        val userRegisterDto: UserRegisterDto = UserRegisterDto(
+            userName = "KangDroid",
+            userPassword = "TestingPassword"
+        )
+        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
+
+        // Check for ID Created well
+        assertThat(registerResponse.errorMessage).isEqualTo("")
+
+        // Trying Login
+        val loginResponse: UserLoginResponseDto = userService.login(
+            UserLoginRequestDto(
+                userName = userRegisterDto.userName,
+                userPassword = userRegisterDto.userPassword
+            ),
+            "127.0.0.1" // self loopback
+        )
+
+        // Login Assert
+        assertThat(loginResponse.errorMessage).isEqualTo("")
+        assertThat(loginResponse.token).isNotEqualTo("")
+
+        // Those above procedure was long, but register op.
+        var responseList: List<UserImageListResponseDto> = userService.listNode(UserImageListRequestDto(
+            loginResponse.token
+        ))
+
+        // There should be no list at all, because there is no registered container though.
+        assertThat(responseList.size).isEqualTo(0)
+
+        // Wrong Input
+        responseList = userService.listNode(UserImageListRequestDto(
+            "token_invalid"
+        ))
+        assertThat(responseList.size).isEqualTo(1)
+        assertThat(responseList[0].errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
+
+        // With Some dummy image
+        val user: User? = userRepository.findByUserToken(loginResponse.token)
+        assertThat(user).isNotEqualTo(null)
+        user!!.dockerImage.add(DockerImage(
+            dockerId = "",
+            user = user,
+            computeRegion = ""
+        ))
+        userRepository.save(user)
+
+        responseList = userService.listNode(UserImageListRequestDto(
+            loginResponse.token
+        ))
+        assertThat(responseList.size).isEqualTo(1)
+        assertThat(responseList[0].errorMessage).isEqualTo("")
     }
 
     @Test
