@@ -38,22 +38,18 @@ class NodeServiceTest {
     fun isGetLoadWorksWell() {
         // Let
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-                id = 10,
-                hostName = "testing",
-                hostPort = "8080",
-                ipAddress = "192.168.0.52"
+            id = 10,
+            hostName = "testing",
+            hostPort = testConfiguration.computeNodeServerPort,
+            ipAddress = testConfiguration.computeNodeServerHostName
         )
         val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
 
         // Assert
-        if (returnValue.errorMessage.isEmpty()) {
-            val list: List<NodeLoadResponseDto> = nodeService.getNodeLoad()
-            assertThat(list.size).isEqualTo(1)
-            assertThat(list[0].nodeLoadPercentage).isNotEmpty
-            assertThat(list[0].regionName).isNotEmpty
-//            println("Region: ${list[0].regionName}")
-//            println("Current Load Percentage: ${list[0].nodeLoadPercentage}%")
-        }
+        val list: List<NodeLoadResponseDto> = nodeService.getNodeLoad()
+        assertThat(list.size).isEqualTo(1)
+        assertThat(list[0].nodeLoadPercentage).isNotEmpty
+        assertThat(list[0].regionName).isNotEmpty
     }
 
     @Test
