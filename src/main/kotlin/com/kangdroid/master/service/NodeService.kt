@@ -19,6 +19,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 import java.util.stream.Collectors
+import javax.annotation.PostConstruct
 
 @Service
 class NodeService {
@@ -30,6 +31,18 @@ class NodeService {
 
     @Autowired
     private lateinit var userService: UserService
+
+    // Global Rest Template
+    private lateinit var restTemplate: RestTemplate
+
+    @PostConstruct
+    fun initRestTemplate() {
+        val clientRequestFactory: HttpComponentsClientHttpRequestFactory = HttpComponentsClientHttpRequestFactory().also {
+            it.setConnectTimeout(5 * 1000)
+            it.setReadTimeout(5 * 1000)
+        }
+        restTemplate = RestTemplate(clientRequestFactory)
+    }
 
     inner class Cause(
             var value: Boolean,
@@ -49,7 +62,6 @@ class NodeService {
         }
 
         // Request compute-node to create a fresh container
-        val restTemplate: RestTemplate = RestTemplate()
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
         val responseEntity: ResponseEntity<UserImageResponseDto> = try {
             restTemplate.postForEntity(url, UserImageResponseDto::class.java)
@@ -79,7 +91,6 @@ class NodeService {
             ?: return "Cannot find Compute Region!"
 
         // Request compute-node to create a fresh container
-        val restTemplate: RestTemplate = RestTemplate()
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/restart"
 
         // Set Parameter[Use Multivalue since we are not global-fying dto object]
@@ -150,12 +161,6 @@ class NodeService {
      * returns: false - when any exception occurs[or internal server error].
      */
     private fun isNodeRunning(nodeSaveRequestDto: NodeSaveRequestDto): Cause {
-        // Set Connection Timeout
-        val clientRequestFactory: HttpComponentsClientHttpRequestFactory = HttpComponentsClientHttpRequestFactory().also {
-            it.setConnectTimeout(5 * 1000)
-            it.setReadTimeout(5 * 1000)
-        }
-        val restTemplate: RestTemplate = RestTemplate(clientRequestFactory)
         val url: String = "http://${nodeSaveRequestDto.ipAddress}:${nodeSaveRequestDto.hostPort}/api/alive"
         val responseEntity: ResponseEntity<NodeAliveResponseDto> = try {
             restTemplate.getForEntity(url, NodeAliveResponseDto::class.java)
