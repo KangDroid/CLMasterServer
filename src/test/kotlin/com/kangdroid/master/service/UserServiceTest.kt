@@ -233,7 +233,18 @@ class UserServiceTest {
         )
 
         // Do work
-        val userRestartResponseDto: UserRestartResponseDto = userService.restartContainer(userRestartRequestDto)
+        var userRestartResponseDto: UserRestartResponseDto = userService.restartContainer(userRestartRequestDto)
         assertThat(userRestartResponseDto.errorMessage).isEqualTo("")
+
+        // Do work[Failure: Wrong Token]
+        userRestartRequestDto.userToken = ""
+        userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
+        assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot find user with token!")
+        userRestartRequestDto.userToken = loginToken // restore token
+
+        // Do work[Failure: Wrong ID]
+        userRestartRequestDto.containerId = ""
+        userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
+        assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot find container ID!")
     }
 }
