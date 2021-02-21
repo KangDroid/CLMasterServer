@@ -67,11 +67,24 @@ class NodeServiceTest {
         )
 
         // do work
-        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        var returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
 
         // Assert
         assertThat(returnValue.regionName.length).isGreaterThan(0)
         assertThat(returnValue.regionName).isEqualTo("Region-${nodeRepository.count() - 1}")
+
+        // Duplication Test
+        returnValue = nodeService.save(nodeSaveRequestDto)
+        assertThat(returnValue.errorMessage).isNotEqualTo("")
+
+        // Wrong IP Address[False]
+        returnValue = nodeService.save(NodeSaveRequestDto(
+            id = 10,
+            hostName = "",
+            hostPort = "9090",
+            ipAddress = "whatever"
+        ))
+        assertThat(returnValue.errorMessage).isNotEqualTo("")
     }
 
     @Test
