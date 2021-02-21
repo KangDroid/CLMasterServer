@@ -6,6 +6,7 @@ plugins {
 	kotlin("jvm") version "1.4.21"
 	kotlin("plugin.spring") version "1.4.21"
 	kotlin("plugin.jpa") version "1.4.21"
+	id("jacoco")
 }
 
 group = "com.kangdroid"
@@ -15,6 +16,46 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 configurations {
 	compileOnly {
 		extendsFrom(configurations.annotationProcessor.get())
+	}
+}
+
+jacoco {
+	toolVersion = "0.8.6"
+}
+
+tasks.jacocoTestReport {
+	reports {
+		html.isEnabled = true
+		xml.isEnabled = false
+		csv.isEnabled = true
+	}
+	finalizedBy("jacocoTestCoverageVerification")
+}
+
+tasks.jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			enabled = true
+			element = "CLASS"
+
+			limit {
+				counter = "BRANCH"
+				value = "COVEREDRATIO"
+				minimum = "0.90".toBigDecimal()
+			}
+
+			limit {
+				counter = "LINE"
+				value = "COVEREDRATIO"
+				minimum = "0.80".toBigDecimal()
+			}
+
+			limit {
+				counter = "LINE"
+				value = "TOTALCOUNT"
+				maximum = "200".toBigDecimal()
+			}
+		}
 	}
 }
 
@@ -63,4 +104,8 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
 	useJUnit()
+}
+
+tasks.test {
+	finalizedBy("jacocoTestReport")
 }
