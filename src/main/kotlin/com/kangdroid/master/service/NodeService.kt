@@ -57,9 +57,9 @@ class NodeService {
             println(e.stackTraceToString())
             return UserImageResponseDto(errorMessage = "Cannot communicate with Compute node!")
         }
-        val userImageResponseDto: UserImageResponseDto = responseEntity.body?.also {
-            it.regionLocation = userImageSaveRequestDto.computeRegion
-        } ?: UserImageResponseDto(errorMessage = "Getting Response from Compute Node failed!")
+        val userImageResponseDto: UserImageResponseDto = responseEntity.body
+            ?: UserImageResponseDto(errorMessage = "Getting Response from Compute Node failed!")
+        userImageResponseDto.regionLocation = userImageSaveRequestDto.computeRegion
 
         // Save back to dockerImage DBData
         val checkResponse: String = userService.saveWithCheck(userImageSaveRequestDto.userToken, userImageResponseDto)
