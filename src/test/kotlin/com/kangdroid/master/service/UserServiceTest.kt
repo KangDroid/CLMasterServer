@@ -72,6 +72,20 @@ class UserServiceTest {
         assertThat(loginResponse.errorMessage).isEqualTo("")
         assertThat(loginResponse.token).isNotEqualTo("")
 
+        // Re-Login so testing another token to be registered
+        val curToken: String = loginResponse.token
+        loginResponse = userService.login(
+            UserLoginRequestDto(
+                userName = userRegisterDto.userName,
+                userPassword = userRegisterDto.userPassword
+            ),
+            "127.0.0.1" // self loopback
+        )
+
+        // Login Assert
+        assertThat(loginResponse.errorMessage).isEqualTo("")
+        assertThat(loginResponse.token).isNotEqualTo(curToken)
+
         // Wrong Login - ID
         loginResponse = userService.login(
             UserLoginRequestDto(
