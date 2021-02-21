@@ -1,9 +1,10 @@
 package com.kangdroid.master.service
 
+import com.kangdroid.master.config.TestConfiguration
 import com.kangdroid.master.data.docker.DockerImage
-import com.kangdroid.master.data.docker.dto.UserImageListResponseDto
-import com.kangdroid.master.data.docker.dto.UserImageResponseDto
-import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
+import com.kangdroid.master.data.docker.dto.*
+import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
+import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.*
@@ -24,6 +25,12 @@ class UserServiceTest {
 
     @Autowired
     private lateinit var userRepository: UserRepository
+
+    @Autowired
+    private lateinit var testConfiguration: TestConfiguration
+
+    @Autowired
+    private lateinit var nodeService: NodeService
 
     @After
     fun clearUserDb() {
@@ -194,5 +201,39 @@ class UserServiceTest {
         // With Wrong Token
         responseString = userService.saveWithCheck("", userImageResponseDto)
         assertThat(responseString).isNotEqualTo("")
+    }
+
+    @Test
+    fun isRestartingContainerWorksWell() {
+        val loginToken: String = registerDemoUser()
+
+        // Register Compute Node
+        // Let
+        val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
+            id = 10,
+            hostName = "testing",
+            hostPort = testConfiguration.computeNodeServerPort,
+            ipAddress = testConfiguration.computeNodeServerHostName
+        )
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+
+        // Now on
+        val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(
+            userToken = loginToken,
+            computeRegion = returnValue.regionName
+        )
+
+        // do work[Successful one]
+        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+
+        // userRestartRequestDto
+        val userRestartRequestDto: UserRestartRequestDto = UserRestartRequestDto(
+            userToken = loginToken,
+            containerId = userImageResponseDto.containerId
+        )
+
+        // Do work
+        val userRestartResponseDto: UserRestartResponseDto = userService.restartContainer(userRestartRequestDto)
+        assertThat(userRestartResponseDto.errorMessage).isEqualTo("")
     }
 }
