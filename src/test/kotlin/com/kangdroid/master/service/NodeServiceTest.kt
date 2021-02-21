@@ -1,6 +1,8 @@
 package com.kangdroid.master.service
 
 import com.kangdroid.master.config.TestConfiguration
+import com.kangdroid.master.data.docker.dto.UserImageResponseDto
+import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
@@ -124,5 +126,40 @@ class NodeServiceTest {
         val encodedPassword: String = passwordEncryptorService.encodePlainText(plainPassword)
 
         assertThat(passwordEncryptorService.isMatching(plainPassword, encodedPassword)).isEqualTo(true)
+    }
+
+    @Test
+    fun isCreatingContainerWorksWell() {
+        // Get Login Token
+        val loginToken = registerDemoUser()
+
+        // Register Compute Node
+        // Let
+        val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
+            id = 10,
+            hostName = "testing",
+            hostPort = testConfiguration.computeNodeServerPort,
+            ipAddress = testConfiguration.computeNodeServerHostName
+        )
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+
+        // Now on
+        val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(
+            userToken = loginToken,
+            computeRegion = returnValue.regionName
+        )
+
+        // do work[Successful one]
+        var userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+        assertThat(userImageResponseDto.errorMessage).isEqualTo("")
+        assertThat(userImageResponseDto.containerId).isNotEqualTo("")
+        assertThat(userImageResponseDto.targetIpAddress).isNotEqualTo("")
+        assertThat(userImageResponseDto.targetPort).isNotEqualTo("")
+        assertThat(userImageResponseDto.regionLocation).isEqualTo(returnValue.regionName)
+
+        // do work[Failure: Wrong Compute Region]
+        userImageSaveRequestDto.computeRegion = ""
+        userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+        assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot find Compute Region!")
     }
 }
