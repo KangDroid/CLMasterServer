@@ -169,8 +169,9 @@ class NodeService {
         }
         val response: NodeAliveResponseDto = responseEntity.body!!
 
-        return Cause(value = ((responseEntity.statusCode == HttpStatus.OK) && (response.isDockerServerRunning)),
-                cause = response.errorMessage
+        return Cause(
+            value = response.isDockerServerRunning,
+            cause = response.errorMessage
         )
     }
 }
