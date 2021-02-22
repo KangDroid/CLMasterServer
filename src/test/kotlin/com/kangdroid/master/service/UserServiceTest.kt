@@ -246,5 +246,6 @@ class UserServiceTest {
         userRestartRequestDto.containerId = ""
         userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
         assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot find container ID!")
+        userRestartRequestDto.containerId = userImageResponseDto.containerId // Restore Container ID
     }
 }
