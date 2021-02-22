@@ -6,10 +6,7 @@ import com.kangdroid.master.data.user.dto.*
 import com.kangdroid.master.service.UserService
 import com.kangdroid.master.service.NodeService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import javax.servlet.http.HttpServletRequest
@@ -42,11 +39,11 @@ class ClientApiController {
      * getNodeListUser(param token) Get List of node for corresponding user.
      */
     @GetMapping("/api/client/node")
-    fun getNodeListUser(@RequestBody userImageListRequestDto: UserImageListRequestDto): List<UserImageListResponseDto> {
-        if (!userService.checkToken(userImageListRequestDto.userToken)) {
+    fun getNodeListUser(@RequestHeader("userToken") userToken: String): List<UserImageListResponseDto> {
+        if (!userService.checkToken(userToken)) {
             return listOf<UserImageListResponseDto>(UserImageListResponseDto(errorMessage = "Token is Invalid. Please Re-Login"))
         }
-        return userService.listNode(userImageListRequestDto)
+        return userService.listNode(userToken)
     }
 
     /**

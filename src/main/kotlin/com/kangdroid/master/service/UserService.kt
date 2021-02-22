@@ -64,8 +64,8 @@ class UserService {
      * Returns Zero or more lists of nodes
      * Returns One DTO with errorMessage.
      */
-    fun listNode(userImageListRequestDto: UserImageListRequestDto): List<UserImageListResponseDto> {
-        val user: User = userRepository.findByUserToken(userImageListRequestDto.userToken)
+    fun listNode(userToken: String): List<UserImageListResponseDto> {
+        val user: User = userRepository.findByUserToken(userToken)
             ?: return listOf(
                 UserImageListResponseDto("", "", "", "Cannot Find User. Please Re-Login")
             )

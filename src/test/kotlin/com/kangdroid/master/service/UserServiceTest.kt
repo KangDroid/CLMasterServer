@@ -149,17 +149,13 @@ class UserServiceTest {
         val loginToken = registerDemoUser()
 
         // Those above procedure was long, but register op.
-        var responseList: List<UserImageListResponseDto> = userService.listNode(UserImageListRequestDto(
-            loginToken
-        ))
+        var responseList: List<UserImageListResponseDto> = userService.listNode(loginToken)
 
         // There should be no list at all, because there is no registered container though.
         assertThat(responseList.size).isEqualTo(0)
 
         // Wrong Input
-        responseList = userService.listNode(UserImageListRequestDto(
-            "token_invalid"
-        ))
+        responseList = userService.listNode("")
         assertThat(responseList.size).isEqualTo(1)
         assertThat(responseList[0].errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
 
@@ -173,9 +169,7 @@ class UserServiceTest {
         ))
         userRepository.save(user)
 
-        responseList = userService.listNode(UserImageListRequestDto(
-            loginToken
-        ))
+        responseList = userService.listNode(loginToken)
         assertThat(responseList.size).isEqualTo(1)
         assertThat(responseList[0].errorMessage).isEqualTo("")
     }
