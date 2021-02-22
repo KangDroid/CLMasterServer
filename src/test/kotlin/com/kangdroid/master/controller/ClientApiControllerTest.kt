@@ -51,6 +51,17 @@ class ClientApiControllerTest {
     }
 
     @Test
+    fun isMasterAliveWorking() {
+        // This is trivial test though
+        val urlFinal: String = "$baseUrl:$port/api/client/alive"
+        val responseEntity: ResponseEntity<Boolean> = testRestTemplate.getForEntity(urlFinal, Boolean::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        val responseBoolean: Boolean = responseEntity.body!!
+        assertThat(responseBoolean).isEqualTo(true)
+    }
+
+    @Test
     fun isGettingNodeLoadWorking() {
         // URL
         val urlFinal: String = "$baseUrl:$port/api/client/node/load"
