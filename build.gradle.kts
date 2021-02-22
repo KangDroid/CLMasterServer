@@ -55,6 +55,10 @@ tasks.jacocoTestCoverageVerification {
 				value = "TOTALCOUNT"
 				maximum = "200".toBigDecimal()
 			}
+
+			excludes = listOf(
+				"com/kangdroid/master/data/**"
+			)
 		}
 	}
 }
