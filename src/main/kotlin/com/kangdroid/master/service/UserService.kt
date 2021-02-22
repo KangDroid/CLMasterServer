@@ -167,9 +167,8 @@ class UserService {
     fun createToken(user: User, ip: String): String {
         val finalString: String = getSHA512(user.userName) + getSHA512(user.userPassword) +
                 getSHA512(ip) + getSHA512(System.currentTimeMillis().toString())
-        val finalArray: CharArray = finalString.toCharArray().also {
-            it.shuffle()
-        }
+        val finalArray: CharArray = finalString.toCharArray()
+        finalArray.shuffle()
 
         return getSHA512(finalArray.joinToString(""))
     }
