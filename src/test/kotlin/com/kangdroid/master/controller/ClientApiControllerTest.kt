@@ -6,7 +6,12 @@ import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.UserRepository
+import com.kangdroid.master.data.user.dto.UserLoginRequestDto
+import com.kangdroid.master.data.user.dto.UserLoginResponseDto
+import com.kangdroid.master.data.user.dto.UserRegisterDto
+import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.service.NodeService
+import com.kangdroid.master.service.UserService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
@@ -41,6 +46,9 @@ class ClientApiControllerTest {
     @Autowired
     private lateinit var nodeService: NodeService
 
+    @Autowired
+    private lateinit var userService: UserService
+
     private val baseUrl: String = "http://localhost"
 
     @Before
@@ -49,6 +57,29 @@ class ClientApiControllerTest {
         nodeRepository.deleteAll()
         userRepository.deleteAll()
     }
+
+    // Register Demo User for testing purpose.
+    // This should not assert!
+    fun registerDemoUser(): String {
+        // Register Operation
+        val userRegisterDto: UserRegisterDto = UserRegisterDto(
+            userName = "KangDroid",
+            userPassword = "TestingPassword"
+        )
+        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
+
+        // Trying Login
+        val loginResponse: UserLoginResponseDto = userService.login(
+            UserLoginRequestDto(
+                userName = userRegisterDto.userName,
+                userPassword = userRegisterDto.userPassword
+            ),
+            "127.0.0.1" // self loopback
+        )
+
+        return loginResponse.token
+    }
+
 
     @Test
     fun isMasterAliveWorking() {
