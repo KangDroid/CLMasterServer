@@ -211,10 +211,24 @@ class ClientApiControllerTest {
         )
 
         // Do Post
-        val responseEntity: ResponseEntity<UserLoginResponseDto> =
+        var responseEntity: ResponseEntity<UserLoginResponseDto> =
             testRestTemplate.postForEntity(finalUrl, userLoginRequestDto, UserLoginResponseDto::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
-        val responseValue: UserLoginResponseDto = responseEntity.body!!
+        var responseValue: UserLoginResponseDto = responseEntity.body!!
+        assertThat(responseValue.errorMessage).isEqualTo("")
+        assertThat(responseValue.token).isNotEqualTo("")
+
+        // Without X-FORWARDED-FOR
+        val headers: HttpHeaders = HttpHeaders()
+        headers.set("X-FORWARDED-FOR", null)
+
+        // Set Entity
+        val entity: HttpEntity<UserLoginRequestDto> = HttpEntity<UserLoginRequestDto>(userLoginRequestDto, headers)
+
+        // Request[Successful one]
+        responseEntity = testRestTemplate.exchange(finalUrl, HttpMethod.POST, entity, UserLoginResponseDto::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+        responseValue = responseEntity.body!!
         assertThat(responseValue.errorMessage).isEqualTo("")
         assertThat(responseValue.token).isNotEqualTo("")
     }
