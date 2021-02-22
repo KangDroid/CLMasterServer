@@ -1,6 +1,8 @@
 package com.kangdroid.master.controller
 
 import com.kangdroid.master.config.TestConfiguration
+import com.kangdroid.master.data.docker.dto.UserImageResponseDto
+import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.getForEntity
+import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
@@ -117,5 +120,51 @@ class ClientApiControllerTest {
             assertThat(loadDto.regionName).isNotEqualTo("")
             assertThat(loadDto.nodeLoadPercentage).isNotEqualTo("")
         }
+    }
+
+    @Test
+    fun isCreatingContainerRequestWorking() {
+        // Login Token
+        val loginToken = registerDemoUser()
+
+        // URL
+        val urlFinal: String = "$baseUrl:$port/api/client/node/create"
+
+        // save node first
+        val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
+            id = 10,
+            hostName = "testing",
+            hostPort = testConfiguration.computeNodeServerPort,
+            ipAddress = testConfiguration.computeNodeServerHostName
+        )
+
+        // Save node
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+
+        // Request Dto
+        val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(
+            dockerId = "",
+            userToken = loginToken,
+            computeRegion = returnValue.regionName
+        )
+
+        // do work[Successful Operation]
+        var responseEntity: ResponseEntity<UserImageResponseDto> =
+            testRestTemplate.postForEntity(urlFinal, userImageSaveRequestDto, UserImageResponseDto::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+        var responseValue: UserImageResponseDto = responseEntity.body!!
+        assertThat((responseValue.errorMessage)).isEqualTo("")
+        assertThat((responseValue.targetIpAddress)).isNotEqualTo("")
+        assertThat((responseValue.targetPort)).isNotEqualTo("")
+        assertThat((responseValue.containerId)).isNotEqualTo("")
+        assertThat((responseValue.regionLocation)).isNotEqualTo("")
+
+        // do work[Failure: Wrong Token]
+        userImageSaveRequestDto.userToken = ""
+        responseEntity = testRestTemplate.postForEntity(urlFinal, userImageSaveRequestDto, UserImageResponseDto::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        responseValue = responseEntity.body!!
+        assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
     }
 }
