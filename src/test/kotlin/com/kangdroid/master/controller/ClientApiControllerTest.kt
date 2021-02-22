@@ -3,6 +3,8 @@ package com.kangdroid.master.controller
 import com.kangdroid.master.config.TestConfiguration
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
+import com.kangdroid.master.data.docker.dto.UserRestartRequestDto
+import com.kangdroid.master.data.docker.dto.UserRestartResponseDto
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
@@ -214,5 +216,54 @@ class ClientApiControllerTest {
         val responseValue: UserLoginResponseDto = responseEntity.body!!
         assertThat(responseValue.errorMessage).isEqualTo("")
         assertThat(responseValue.token).isNotEqualTo("")
+    }
+
+    @Test
+    fun isRestartingContainerNodeWorksWell() {
+        val loginToken = registerDemoUser()
+        // URL
+        val urlFinal: String = "$baseUrl:$port/api/client/node/create"
+        val restartUrl: String = "$baseUrl:$port/api/client/restart"
+
+        // save node first
+        val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
+            id = 10,
+            hostName = "testing",
+            hostPort = testConfiguration.computeNodeServerPort,
+            ipAddress = testConfiguration.computeNodeServerHostName
+        )
+
+        // Save node
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+
+        // Request Dto
+        val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(
+            dockerId = "",
+            userToken = loginToken,
+            computeRegion = returnValue.regionName
+        )
+
+        // Create Container
+        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+
+        // Restart Request Dto
+        val userRestartRequestDto: UserRestartRequestDto = UserRestartRequestDto(
+            userToken = loginToken,
+            containerId = userImageResponseDto.containerId
+        )
+
+        // Request
+        var responseEntity: ResponseEntity<UserRestartResponseDto> =
+            testRestTemplate.postForEntity(restartUrl, userRestartRequestDto, UserRestartResponseDto::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+        var responseValue: UserRestartResponseDto = responseEntity.body!!
+        assertThat(responseValue.errorMessage).isEqualTo("")
+
+        // Request[Failure: Wrong Token]
+        userRestartRequestDto.userToken = ""
+        responseEntity = testRestTemplate.postForEntity(restartUrl, userRestartRequestDto, UserRestartResponseDto::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+        responseValue = responseEntity.body!!
+        assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
     }
 }
