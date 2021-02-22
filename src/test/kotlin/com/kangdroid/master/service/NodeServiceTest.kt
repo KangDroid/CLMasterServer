@@ -1,12 +1,15 @@
 package com.kangdroid.master.service
 
 import com.kangdroid.master.config.TestConfiguration
+import com.kangdroid.master.data.docker.DockerImage
+import com.kangdroid.master.data.docker.DockerImageRepository
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
+import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
@@ -25,8 +28,10 @@ import org.springframework.http.MediaType
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators
 import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.client.RestTemplate
@@ -52,6 +57,9 @@ class NodeServiceTest {
 
     @Autowired
     private lateinit var testConfiguration: TestConfiguration
+
+    @Autowired
+    private lateinit var dockerImageRepository: DockerImageRepository
 
     @Before
     @After
@@ -194,5 +202,49 @@ class NodeServiceTest {
 
         // Reset mock
         nodeService.restTemplate.requestFactory = originalRequestFactory
+    }
+
+    @Test
+    fun isRestartContainerWorksWell() {
+        // Get Login Token
+        val loginToken = registerDemoUser()
+
+        // Register Compute Node
+        // Let
+        val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
+            id = 10,
+            hostName = "testing",
+            hostPort = testConfiguration.computeNodeServerPort,
+            ipAddress = testConfiguration.computeNodeServerHostName
+        )
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+
+        // Now on
+        val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(
+            userToken = loginToken,
+            computeRegion = returnValue.regionName
+        )
+
+        // Create Container
+        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+
+        // Find Docker Image Entity
+        val user: User = userRepository.findByUserToken(loginToken)!!
+        lateinit var dockerImage: DockerImage
+        for (dockerImageTest in user.dockerImage) {
+            if (dockerImageTest.dockerId == userImageResponseDto.containerId) {
+                dockerImage = dockerImageTest
+                break
+            }
+        }
+
+        // do work[Successful work]
+        var responseString: String = nodeService.restartContainer(dockerImage)
+        assertThat(responseString).isEqualTo("")
+
+        // do work[Failure: Wrong Compute Region somehow]
+        dockerImage.computeRegion = ""
+        responseString = nodeService.restartContainer(dockerImage)
+        assertThat(responseString).isEqualTo("Cannot find Compute Region!")
     }
 }
