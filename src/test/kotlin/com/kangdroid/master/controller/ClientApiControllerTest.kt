@@ -1,10 +1,7 @@
 package com.kangdroid.master.controller
 
 import com.kangdroid.master.config.TestConfiguration
-import com.kangdroid.master.data.docker.dto.UserImageResponseDto
-import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
-import com.kangdroid.master.data.docker.dto.UserRestartRequestDto
-import com.kangdroid.master.data.docker.dto.UserRestartResponseDto
+import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
@@ -24,9 +21,13 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.client.exchange
 import org.springframework.boot.test.web.client.getForEntity
 import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 
@@ -265,5 +266,36 @@ class ClientApiControllerTest {
         assertThat(responseEntity.body).isNotEqualTo(null)
         responseValue = responseEntity.body!!
         assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
+    }
+
+    @Test
+    fun isNodeListingWorksWell() {
+        val finalUrl: String = "$baseUrl:$port/api/client/node"
+        val loginToken: String = registerDemoUser()
+
+        // Set HTTP Headers
+        val headers: HttpHeaders = HttpHeaders()
+        headers.set("userToken", loginToken)
+
+        // Set Entity
+        val entity: HttpEntity<String> = HttpEntity<String>(headers)
+
+        // Request[Successful one]
+        var responseEntity: ResponseEntity<Array<UserImageListResponseDto>> =
+            testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        var responseValue: Array<UserImageListResponseDto> = responseEntity.body!!
+        assertThat(responseValue.size).isEqualTo(0)
+
+        // Request[Failure: Wrong Token]
+        headers.set("userToken", "a")
+        responseEntity = testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        responseValue = responseEntity.body!!
+        assertThat(responseValue.size).isEqualTo(1)
+        assertThat(responseValue[0].errorMessage).isNotEqualTo("")
+        assertThat(responseValue[0].errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
     }
 }
