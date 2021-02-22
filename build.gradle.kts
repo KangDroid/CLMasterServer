@@ -57,7 +57,9 @@ tasks.jacocoTestCoverageVerification {
 			}
 
 			excludes = listOf(
-				"com/kangdroid/master/data/**"
+				"com.kangdroid.master.data.**",
+				"com.kangdroid.master.CLMasterServerKt",
+				"com.kangdroid.master.service.UserService.login.**"
 			)
 		}
 	}
