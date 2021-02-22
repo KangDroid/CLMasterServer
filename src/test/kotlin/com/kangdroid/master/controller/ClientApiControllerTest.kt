@@ -167,4 +167,23 @@ class ClientApiControllerTest {
         responseValue = responseEntity.body!!
         assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
     }
+
+    @Test
+    fun isRegisteringUserWorksWell() {
+        // Let
+        val finalUrl: String = "$baseUrl:$port/api/client/register"
+        val userRegisterDto: UserRegisterDto = UserRegisterDto(
+            userName = "testing",
+            userPassword = "testing_password"
+        )
+
+        // do work
+        val responseEntity: ResponseEntity<UserRegisterResponseDto> =
+            testRestTemplate.postForEntity(finalUrl, userRegisterDto, UserRegisterResponseDto::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        val responseValue: UserRegisterResponseDto = responseEntity.body!!
+        assertThat(responseValue.errorMessage).isEqualTo("")
+        assertThat(responseValue.registeredId).isEqualTo(userRegisterDto.userName)
+    }
 }
