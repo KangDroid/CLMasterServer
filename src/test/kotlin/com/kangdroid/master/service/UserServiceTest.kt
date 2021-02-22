@@ -15,7 +15,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpMethod
+import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers
+import org.springframework.test.web.client.response.MockRestResponseCreators
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
@@ -247,5 +252,16 @@ class UserServiceTest {
         userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
         assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot find container ID!")
         userRestartRequestDto.containerId = userImageResponseDto.containerId // Restore Container ID
+
+        // Do work[Failure: Internal Node Server Error]
+        val originalRequestFactory: ClientHttpRequestFactory = nodeService.restTemplate.requestFactory
+        val mockServer: MockRestServiceServer = MockRestServiceServer.bindTo(nodeService.restTemplate).build()
+        mockServer.expect(MockRestRequestMatchers.requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart"))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withServerError()) // Internal Error
+        userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
+        assertThat(userRestartResponseDto.errorMessage).isNotEqualTo("")
+        assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot communicate with Compute node!")
+        nodeService.restTemplate.requestFactory = originalRequestFactory // Restore requestFactory on nodeServer's restTemplate
     }
 }
