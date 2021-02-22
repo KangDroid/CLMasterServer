@@ -186,4 +186,33 @@ class ClientApiControllerTest {
         assertThat(responseValue.errorMessage).isEqualTo("")
         assertThat(responseValue.registeredId).isEqualTo(userRegisterDto.userName)
     }
+
+    @Test
+    fun isLoggingInWorksWell() {
+        // Register First
+        val registerUrl: String = "$baseUrl:$port/api/client/register"
+        val userRegisterDto: UserRegisterDto = UserRegisterDto(
+            userName = "testing",
+            userPassword = "testing_password"
+        )
+
+        // do work
+        val registerResponseEntity: ResponseEntity<UserRegisterResponseDto> =
+            testRestTemplate.postForEntity(registerUrl, userRegisterDto, UserRegisterResponseDto::class)
+
+        // Let
+        val finalUrl: String = "$baseUrl:$port/api/client/login"
+        val userLoginRequestDto: UserLoginRequestDto = UserLoginRequestDto(
+            userName = userRegisterDto.userName,
+            userPassword = userRegisterDto.userPassword
+        )
+
+        // Do Post
+        val responseEntity: ResponseEntity<UserLoginResponseDto> =
+            testRestTemplate.postForEntity(finalUrl, userLoginRequestDto, UserLoginResponseDto::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+        val responseValue: UserLoginResponseDto = responseEntity.body!!
+        assertThat(responseValue.errorMessage).isEqualTo("")
+        assertThat(responseValue.token).isNotEqualTo("")
+    }
 }
