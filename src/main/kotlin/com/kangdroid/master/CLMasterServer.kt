@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class CLMasterServer
 
 fun main(args: Array<String>) {
-	runApplication<CLMasterServer>(*args)
+    runApplication<CLMasterServer>(*args)
 }

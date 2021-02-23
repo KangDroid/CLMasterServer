@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 @Service
 class PasswordEncryptorService {
     private val argon2PasswordEncoder: Argon2PasswordEncoder = Argon2PasswordEncoder(
-            16, 32, 1, 4096, 5
+        16, 32, 1, 4096, 5
     )
 
     fun encodePlainText(plainInput: String): String {

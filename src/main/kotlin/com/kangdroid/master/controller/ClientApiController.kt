@@ -2,9 +2,12 @@ package com.kangdroid.master.controller
 
 import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
-import com.kangdroid.master.data.user.dto.*
-import com.kangdroid.master.service.UserService
+import com.kangdroid.master.data.user.dto.UserLoginRequestDto
+import com.kangdroid.master.data.user.dto.UserLoginResponseDto
+import com.kangdroid.master.data.user.dto.UserRegisterDto
+import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.service.NodeService
+import com.kangdroid.master.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.request.RequestContextHolder
@@ -71,7 +74,8 @@ class ClientApiController {
 
     @PostMapping("/api/client/login")
     fun loginUser(@RequestBody userImageLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {
-        val servletRequest: HttpServletRequest = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
+        val servletRequest: HttpServletRequest =
+            (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
         var fromIp: String? = servletRequest.getHeader("X-FORWARDED-FOR")
         if (fromIp == null) {
             fromIp = servletRequest.remoteAddr

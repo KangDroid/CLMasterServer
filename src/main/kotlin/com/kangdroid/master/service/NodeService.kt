@@ -10,12 +10,9 @@ import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 import java.util.stream.Collectors
@@ -37,16 +34,17 @@ class NodeService {
 
     @PostConstruct
     fun initRestTemplate() {
-        val clientRequestFactory: HttpComponentsClientHttpRequestFactory = HttpComponentsClientHttpRequestFactory().also {
-            it.setConnectTimeout(10 * 1000)
-            it.setReadTimeout(10 * 1000)
-        }
+        val clientRequestFactory: HttpComponentsClientHttpRequestFactory =
+            HttpComponentsClientHttpRequestFactory().also {
+                it.setConnectTimeout(10 * 1000)
+                it.setReadTimeout(10 * 1000)
+            }
         restTemplate = RestTemplate(clientRequestFactory)
     }
 
     inner class Cause(
-            var value: Boolean,
-            var cause: String
+        var value: Boolean,
+        var cause: String
     )
 
     /**
@@ -96,6 +94,7 @@ class NodeService {
         class restartRequestDto(
             var containerId: String
         )
+
         val requestDto: restartRequestDto = restartRequestDto(dockerImage.dockerId)
 
         val responseEntity: ResponseEntity<String> = try {
@@ -118,8 +117,8 @@ class NodeService {
      */
     fun getNodeLoad(): List<NodeLoadResponseDto> {
         return nodeRepository.findAll().stream()
-                .map {NodeLoadResponseDto(it, restTemplate)}
-                .collect(Collectors.toList())
+            .map { NodeLoadResponseDto(it, restTemplate) }
+            .collect(Collectors.toList())
     }
 
     /**

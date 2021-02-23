@@ -71,23 +71,48 @@ class ClientApiControllerTest {
         clientHttpRequestFactory = nodeService.restTemplate.requestFactory
         mockServer = MockRestServiceServer.bindTo(nodeService.restTemplate)
             .ignoreExpectOrder(true).build()
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive")
+        )
             .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess("{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    "{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/load"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/load")
+        )
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("1.05", MediaType.TEXT_PLAIN))
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/port"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/port")
+        )
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("1234", MediaType.TEXT_PLAIN))
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/image"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/image")
+        )
             .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("{\"targetIpAddress\": \"127.0.0.1\", \"targetPort\":\"1234\", \"containerId\":\"1234test\", \"regionLocation\":\"Region-0\", \"errorMessage\":\"\"}", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    "{\"targetIpAddress\": \"127.0.0.1\", \"targetPort\":\"1234\", \"containerId\":\"1234test\", \"regionLocation\":\"Region-0\", \"errorMessage\":\"\"}",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart")
+        )
             .andExpect(method(HttpMethod.POST))
             .andRespond(withSuccess("", MediaType.TEXT_PLAIN))
     }
@@ -154,7 +179,8 @@ class ClientApiControllerTest {
         var returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
 
         // Request
-        val responseLoad: ResponseEntity<Array<NodeLoadResponseDto>> = testRestTemplate.getForEntity(urlFinal, Array<NodeLoadResponseDto>::class)
+        val responseLoad: ResponseEntity<Array<NodeLoadResponseDto>> =
+            testRestTemplate.getForEntity(urlFinal, Array<NodeLoadResponseDto>::class)
         assertThat(responseLoad.body).isNotEqualTo(null) // Check for null
 
         // Get Response Value
@@ -316,7 +342,8 @@ class ClientApiControllerTest {
 
         // Request[Failure: Wrong Token]
         userRestartRequestDto.userToken = ""
-        responseEntity = testRestTemplate.postForEntity(restartUrl, userRestartRequestDto, UserRestartResponseDto::class)
+        responseEntity =
+            testRestTemplate.postForEntity(restartUrl, userRestartRequestDto, UserRestartResponseDto::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
         responseValue = responseEntity.body!!
         assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
@@ -344,7 +371,8 @@ class ClientApiControllerTest {
 
         // Request[Failure: Wrong Token]
         headers.set("userToken", "a")
-        responseEntity = testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
+        responseEntity =
+            testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
 
         responseValue = responseEntity.body!!

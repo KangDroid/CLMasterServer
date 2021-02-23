@@ -50,11 +50,13 @@ class UserService {
         val user: User = userRepository.findByUserToken(token)
             ?: return "Cannot Find User. Please Re-Login"
 
-        user.dockerImage.add(DockerImage(
-            dockerId = userImageResponseDto.containerId,
-            computeRegion = userImageResponseDto.regionLocation,
-            user = user
-        ))
+        user.dockerImage.add(
+            DockerImage(
+                dockerId = userImageResponseDto.containerId,
+                computeRegion = userImageResponseDto.regionLocation,
+                user = user
+            )
+        )
         userRepository.save(user)
         return ""
     }
@@ -105,11 +107,13 @@ class UserService {
         }
 
         // Save!
-        userRepository.save(User(
-            id = 0,
-            userName = userRegisterDto.userName,
-            userPassword = passwordEncryptorService.encodePlainText(userRegisterDto.userPassword),
-        ))
+        userRepository.save(
+            User(
+                id = 0,
+                userName = userRegisterDto.userName,
+                userPassword = passwordEncryptorService.encodePlainText(userRegisterDto.userPassword),
+            )
+        )
 
         return UserRegisterResponseDto(userRegisterDto.userName, "")
     }
@@ -187,7 +191,7 @@ class UserService {
     /**
      * RestartContainer(): Restart Corresponding Container
      */
-    fun restartContainer(userRestartRequestDto: UserRestartRequestDto) : UserRestartResponseDto {
+    fun restartContainer(userRestartRequestDto: UserRestartRequestDto): UserRestartResponseDto {
         val user: User = userRepository.findByUserToken(userRestartRequestDto.userToken)
             ?: return UserRestartResponseDto(errorMessage = "Cannot find user with token!")
         val dockerImageList: MutableList<DockerImage> = user.dockerImage

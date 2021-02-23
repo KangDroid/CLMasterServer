@@ -1,7 +1,5 @@
 package com.kangdroid.master.data.docker.dto
 
-import com.kangdroid.master.data.docker.DockerImage
-
 /**
  * UserImageSaveRequestDto
  * Whoa! Long Name!
@@ -16,7 +14,7 @@ import com.kangdroid.master.data.docker.DockerImage
  * computeRegion for determine where user requested container in specific compute region.
  */
 class UserImageSaveRequestDto(
-        var userToken: String,
-        var dockerId: String = "",
-        var computeRegion: String
+    var userToken: String,
+    var dockerId: String = "",
+    var computeRegion: String
 )

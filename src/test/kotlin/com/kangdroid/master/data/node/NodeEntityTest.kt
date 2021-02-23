@@ -24,11 +24,11 @@ class NodeEntityTest {
     fun isSaveWorks() {
         // Let
         val nodeTmp: Node = Node(
-                id = 1000,
-                hostName = "localhost",
-                ipAddress = "192.168.0.8",
-                hostPort = "8080",
-                regionName = ""
+            id = 1000,
+            hostName = "localhost",
+            ipAddress = "192.168.0.8",
+            hostPort = "8080",
+            regionName = ""
         )
 
         // save

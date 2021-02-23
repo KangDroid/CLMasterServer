@@ -21,6 +21,6 @@ class User(
     @Column(length = 500, nullable = true)
     var userTokenExp: Long = 0,
 
-    @OneToMany(fetch=FetchType.EAGER, mappedBy = "user", cascade = [CascadeType.ALL])
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = [CascadeType.ALL])
     var dockerImage: MutableList<DockerImage> = mutableListOf()
 )

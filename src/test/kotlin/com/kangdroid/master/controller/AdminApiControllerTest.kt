@@ -21,10 +21,8 @@ import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.client.ExpectedCount.manyTimes
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.test.web.client.match.MockRestRequestMatchers
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
-import org.springframework.test.web.client.response.MockRestResponseCreators
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 
 @RunWith(SpringRunner::class)
@@ -56,21 +54,30 @@ class AdminApiControllerTest {
     fun isRegisterNodeWorking() {
         val originalRequestFactory: ClientHttpRequestFactory = nodeService.restTemplate.requestFactory
         val mockServer: MockRestServiceServer = MockRestServiceServer.bindTo(nodeService.restTemplate).build()
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive")
+        )
             .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess("{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    "{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
         // Let
         val url: String = "$baseUrl:$port/api/admin/node/register"
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-                id = 10,
-                hostName = "testing",
-                hostPort = testConfiguration.computeNodeServerPort,
-                ipAddress = testConfiguration.computeNodeServerHostName
+            id = 10,
+            hostName = "testing",
+            hostPort = testConfiguration.computeNodeServerPort,
+            ipAddress = testConfiguration.computeNodeServerHostName
         )
 
         // do work
-        val responseEntity: ResponseEntity<String> = testRestTemplate.postForEntity(url, nodeSaveRequestDto, NodeSaveRequestDto::class)
+        val responseEntity: ResponseEntity<String> =
+            testRestTemplate.postForEntity(url, nodeSaveRequestDto, NodeSaveRequestDto::class)
         val returnValue: String = responseEntity.body ?: "Error"
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
 

@@ -14,10 +14,10 @@ import org.springframework.web.client.RestTemplate
  * nodeLoadPercentage for Node Load Percentage in last 1-minute.
  */
 class NodeLoadResponseDto(
-        var regionName: String = "",
-        var nodeLoadPercentage: String = ""
+    var regionName: String = "",
+    var nodeLoadPercentage: String = ""
 ) {
-    constructor(entity: Node, restTemplate: RestTemplate): this(regionName = entity.regionName) {
+    constructor(entity: Node, restTemplate: RestTemplate) : this(regionName = entity.regionName) {
         // When we get fresh node data from Entity, thus we have to convert entity to this dto.
         // So, when we converting, we check load information!
         val url: String = "http://${entity.ipAddress}:${entity.hostPort}/api/node/load"

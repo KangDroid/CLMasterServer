@@ -13,18 +13,18 @@ import com.kangdroid.master.data.node.Node
  * [regionName] will be initialized after creating dto.
  */
 class NodeSaveRequestDto(
-        var id: Long,
-        var hostName: String,
-        var hostPort: String,
-        var ipAddress: String
+    var id: Long,
+    var hostName: String,
+    var hostPort: String,
+    var ipAddress: String
 ) {
     fun toEntity(): Node {
         return Node(
-                id = this.id,
-                hostName = this.hostName,
-                ipAddress = this.ipAddress,
-                hostPort = this.hostPort,
-                regionName = "TMP_REGION"
+            id = this.id,
+            hostName = this.hostName,
+            ipAddress = this.ipAddress,
+            hostPort = this.hostPort,
+            regionName = "TMP_REGION"
         )
     }
 }

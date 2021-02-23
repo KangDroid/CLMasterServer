@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional
 /**
  * It is just DAO for Entity "User", Might contains User Data.
  */
-interface UserRepository: JpaRepository<User, Long> {
+interface UserRepository : JpaRepository<User, Long> {
     @Transactional(readOnly = true)
     fun findByUserName(input: String): User?
 

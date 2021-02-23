@@ -7,10 +7,12 @@ import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
-import com.kangdroid.master.data.user.dto.*
+import com.kangdroid.master.data.user.dto.UserLoginRequestDto
+import com.kangdroid.master.data.user.dto.UserLoginResponseDto
+import com.kangdroid.master.data.user.dto.UserRegisterDto
+import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,23 +55,48 @@ class UserServiceTest {
         clientHttpRequestFactory = nodeService.restTemplate.requestFactory
         mockServer = MockRestServiceServer.bindTo(nodeService.restTemplate)
             .ignoreExpectOrder(true).build()
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive")
+        )
             .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess("{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    "{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/load"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/load")
+        )
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("1.05", MediaType.TEXT_PLAIN))
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/port"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/port")
+        )
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("1234", MediaType.TEXT_PLAIN))
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/image"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/image")
+        )
             .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("{\"targetIpAddress\": \"127.0.0.1\", \"targetPort\":\"1234\", \"containerId\":\"1234test\", \"regionLocation\":\"Region-0\", \"errorMessage\":\"\"}", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    "{\"targetIpAddress\": \"127.0.0.1\", \"targetPort\":\"1234\", \"containerId\":\"1234test\", \"regionLocation\":\"Region-0\", \"errorMessage\":\"\"}",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart")
+        )
             .andExpect(method(HttpMethod.POST))
             .andRespond(withSuccess("", MediaType.TEXT_PLAIN))
     }
@@ -204,11 +231,13 @@ class UserServiceTest {
         // With Some dummy image
         val user: User? = userRepository.findByUserToken(loginToken)
         assertThat(user).isNotEqualTo(null)
-        user!!.dockerImage.add(DockerImage(
-            dockerId = "",
-            user = user,
-            computeRegion = ""
-        ))
+        user!!.dockerImage.add(
+            DockerImage(
+                dockerId = "",
+                user = user,
+                computeRegion = ""
+            )
+        )
         userRepository.save(user)
 
         responseList = userService.listNode(loginToken)
@@ -221,13 +250,17 @@ class UserServiceTest {
         val loginToken: String = registerDemoUser()
 
         // CheckToken
-        assertThat(userService.checkToken(
-            loginToken
-        )).isEqualTo(true)
+        assertThat(
+            userService.checkToken(
+                loginToken
+            )
+        ).isEqualTo(true)
 
-        assertThat(userService.checkToken(
-            "loginResponse.token"
-        )).isEqualTo(false)
+        assertThat(
+            userService.checkToken(
+                "loginResponse.token"
+            )
+        ).isEqualTo(false)
     }
 
     @Test
@@ -298,6 +331,7 @@ class UserServiceTest {
         userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
         assertThat(userRestartResponseDto.errorMessage).isNotEqualTo("")
         assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot communicate with Compute node!")
-        nodeService.restTemplate.requestFactory = originalRequestFactory // Restore requestFactory on nodeServer's restTemplate
+        nodeService.restTemplate.requestFactory =
+            originalRequestFactory // Restore requestFactory on nodeServer's restTemplate
     }
 }

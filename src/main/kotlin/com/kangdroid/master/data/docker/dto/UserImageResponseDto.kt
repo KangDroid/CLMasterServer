@@ -10,9 +10,9 @@ package com.kangdroid.master.data.docker.dto
  * regionLocation for determine which region are we using for specific container.
  */
 class UserImageResponseDto(
-        var targetIpAddress: String = "",
-        var targetPort: String = "",
-        var containerId: String = "",
-        var regionLocation: String = "",
-        var errorMessage: String = "",
+    var targetIpAddress: String = "",
+    var targetPort: String = "",
+    var containerId: String = "",
+    var regionLocation: String = "",
+    var errorMessage: String = "",
 )

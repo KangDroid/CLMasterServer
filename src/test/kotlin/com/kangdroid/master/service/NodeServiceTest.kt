@@ -23,18 +23,15 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.test.context.junit4.SpringRunner
-import org.springframework.test.web.client.ExpectedCount.*
+import org.springframework.test.web.client.ExpectedCount.manyTimes
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.test.web.client.match.MockRestRequestMatchers
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
-import org.springframework.test.web.client.response.MockRestResponseCreators
-import org.springframework.test.web.client.response.MockRestResponseCreators.*
-import org.springframework.web.client.RestTemplate
+import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
@@ -79,23 +76,48 @@ class NodeServiceTest {
         clientHttpRequestFactory = nodeService.restTemplate.requestFactory
         mockServer = MockRestServiceServer.bindTo(nodeService.restTemplate)
             .ignoreExpectOrder(true).build()
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive")
+        )
             .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess("{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    "{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/load"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/load")
+        )
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("1.05", MediaType.TEXT_PLAIN))
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/port"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/port")
+        )
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("1234", MediaType.TEXT_PLAIN))
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/image"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/image")
+        )
             .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess("{\"targetIpAddress\": \"127.0.0.1\", \"targetPort\":\"1234\", \"containerId\":\"1234test\", \"regionLocation\":\"Region-0\", \"errorMessage\":\"\"}", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    "{\"targetIpAddress\": \"127.0.0.1\", \"targetPort\":\"1234\", \"containerId\":\"1234test\", \"regionLocation\":\"Region-0\", \"errorMessage\":\"\"}",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
-        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart"))
+        mockServer.expect(
+            manyTimes(),
+            requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart")
+        )
             .andExpect(method(HttpMethod.POST))
             .andRespond(withSuccess("", MediaType.TEXT_PLAIN))
     }
@@ -149,10 +171,10 @@ class NodeServiceTest {
     fun isSavingWorksWell() {
         // Let
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-                id = 10,
-                hostName = "testing",
-                hostPort = testConfiguration.computeNodeServerPort,
-                ipAddress = testConfiguration.computeNodeServerHostName
+            id = 10,
+            hostName = "testing",
+            hostPort = testConfiguration.computeNodeServerPort,
+            ipAddress = testConfiguration.computeNodeServerHostName
         )
 
         // do work
@@ -172,12 +194,14 @@ class NodeServiceTest {
         mockServerFailing.expect(requestTo("http://whatever:9090/api/alive"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withServerError()) // Internal Error
-        returnValue = nodeService.save(NodeSaveRequestDto(
-            id = 10,
-            hostName = "",
-            hostPort = "9090",
-            ipAddress = "whatever"
-        ))
+        returnValue = nodeService.save(
+            NodeSaveRequestDto(
+                id = 10,
+                hostName = "",
+                hostPort = "9090",
+                ipAddress = "whatever"
+            )
+        )
         assertThat(returnValue.errorMessage).isNotEqualTo("")
         nodeService.restTemplate.requestFactory = originalRequestFactory // restore working template
     }
