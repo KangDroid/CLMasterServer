@@ -110,8 +110,6 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
 	useJUnit()
-	val masterServerTestProperty: String by project
-	this.jvmArgs = listOf("-Dspring.config.location=${masterServerTestProperty}")
 }
 
 tasks.test {
