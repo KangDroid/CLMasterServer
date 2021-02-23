@@ -25,11 +25,16 @@ import org.springframework.boot.test.web.client.exchange
 import org.springframework.boot.test.web.client.getForEntity
 import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.boot.web.server.LocalServerPort
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
+import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.web.client.ExpectedCount.manyTimes
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.method
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import javax.annotation.PostConstruct
+import javax.annotation.PreDestroy
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -56,6 +61,41 @@ class ClientApiControllerTest {
     private lateinit var userService: UserService
 
     private val baseUrl: String = "http://localhost"
+
+    // Mock Rest Service
+    private lateinit var mockServer: MockRestServiceServer
+    private lateinit var clientHttpRequestFactory: ClientHttpRequestFactory // For getting real server one
+
+    @PostConstruct
+    fun initMockServer() {
+        clientHttpRequestFactory = nodeService.restTemplate.requestFactory
+        mockServer = MockRestServiceServer.bindTo(nodeService.restTemplate)
+            .ignoreExpectOrder(true).build()
+        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/alive"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("{\"isDockerServerRunning\": true, \"errorMessage\": \"\"}", MediaType.APPLICATION_JSON))
+
+        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/load"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("1.05", MediaType.TEXT_PLAIN))
+
+        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/port"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("1234", MediaType.TEXT_PLAIN))
+
+        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/image"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("{\"targetIpAddress\": \"127.0.0.1\", \"targetPort\":\"1234\", \"containerId\":\"1234test\", \"regionLocation\":\"Region-0\", \"errorMessage\":\"\"}", MediaType.APPLICATION_JSON))
+
+        mockServer.expect(manyTimes(), requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("", MediaType.TEXT_PLAIN))
+    }
+
+    @PreDestroy
+    fun destroyMockServer() {
+        nodeService.restTemplate.requestFactory = clientHttpRequestFactory
+    }
 
     @Before
     @After
