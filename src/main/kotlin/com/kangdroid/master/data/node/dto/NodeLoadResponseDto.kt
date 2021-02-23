@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
  * nodeLoadPercentage for Node Load Percentage in last 1-minute.
  */
 class NodeLoadResponseDto(
-        var regionName: String,
+        var regionName: String = "",
         var nodeLoadPercentage: String = ""
 ) {
     constructor(entity: Node, restTemplate: RestTemplate): this(regionName = entity.regionName) {
