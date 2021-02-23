@@ -17,10 +17,9 @@ class NodeLoadResponseDto(
         var regionName: String,
         var nodeLoadPercentage: String = ""
 ) {
-    constructor(entity: Node): this(regionName = entity.regionName) {
+    constructor(entity: Node, restTemplate: RestTemplate): this(regionName = entity.regionName) {
         // When we get fresh node data from Entity, thus we have to convert entity to this dto.
         // So, when we converting, we check load information!
-        val restTemplate: RestTemplate = RestTemplate()
         val url: String = "http://${entity.ipAddress}:${entity.hostPort}/api/node/load"
         val responseEntity: ResponseEntity<String> = restTemplate.getForEntity(url, String::class.java)
 

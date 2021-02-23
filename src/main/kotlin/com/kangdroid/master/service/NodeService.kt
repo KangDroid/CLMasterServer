@@ -118,7 +118,7 @@ class NodeService {
      */
     fun getNodeLoad(): List<NodeLoadResponseDto> {
         return nodeRepository.findAll().stream()
-                .map {NodeLoadResponseDto(it)}
+                .map {NodeLoadResponseDto(it, restTemplate)}
                 .collect(Collectors.toList())
     }
 
