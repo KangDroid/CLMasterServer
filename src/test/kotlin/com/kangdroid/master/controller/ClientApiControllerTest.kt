@@ -197,7 +197,7 @@ class ClientApiControllerTest {
         val loginToken = registerDemoUser()
 
         // URL
-        val urlFinal: String = "$baseUrl:$port/api/client/node/create"
+        val urlFinal: String = "$baseUrl:$port/api/client/container"
 
         // save node first
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(

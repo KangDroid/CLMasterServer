@@ -54,7 +54,7 @@ class ClientApiController {
      * returns: UserImageResponseDto with IP/Port/ContainerID/Location
      * returns: UserImageResponseDto with errorMessage.
      */
-    @PostMapping("/api/client/node/create")
+    @PostMapping("/api/client/container")
     fun createContainer(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto): UserImageResponseDto {
         if (!userService.checkToken(userImageSaveRequestDto.userToken))
             return UserImageResponseDto(errorMessage = "Token is Invalid. Please Re-Login")
