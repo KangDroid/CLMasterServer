@@ -94,6 +94,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-test")
     implementation("org.bouncycastle:bcprov-jdk15on:1.64")
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.2")
     testImplementation("org.bouncycastle:bcprov-jdk15on:1.64")
     runtimeOnly("com.h2database:h2")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
