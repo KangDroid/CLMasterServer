@@ -6,7 +6,7 @@ import com.kangdroid.master.data.docker.DockerImageRepository
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.NodeRepository
-import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
+import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.User
@@ -161,7 +161,7 @@ class NodeServiceTest {
         val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
 
         // Assert
-        val list: List<NodeLoadResponseDto> = nodeService.getNodeLoad()
+        val list: List<NodeInformationResponseDto> = nodeService.getNodeInformation()
         assertThat(list.size).isEqualTo(1)
         assertThat(list[0].nodeLoadPercentage).isNotEmpty
         assertThat(list[0].regionName).isNotEmpty

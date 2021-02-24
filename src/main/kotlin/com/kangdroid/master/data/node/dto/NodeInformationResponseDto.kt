@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate
  * regionName for Compute-region[device identifier]
  * nodeLoadPercentage for Node Load Percentage in last 1-minute.
  */
-class NodeLoadResponseDto(
+class NodeInformationResponseDto(
     var regionName: String = "",
     var nodeLoadPercentage: String = ""
 ) {

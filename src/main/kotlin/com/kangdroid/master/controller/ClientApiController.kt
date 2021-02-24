@@ -1,7 +1,7 @@
 package com.kangdroid.master.controller
 
 import com.kangdroid.master.data.docker.dto.*
-import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
+import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
@@ -27,9 +27,9 @@ class ClientApiController {
      * getNodeLoad(): Get All of Registered Node Load as List.
      * Returns: List of <NodeLoadResponseDto>[containing Load information]
      */
-    @GetMapping("/api/client/node/load")
-    fun getNodeLoad(): List<NodeLoadResponseDto> {
-        return nodeService.getNodeLoad()
+    @GetMapping("/api/client/node")
+    fun getNodeInformation(): List<NodeInformationResponseDto> {
+        return nodeService.getNodeInformation()
     }
 
     /**

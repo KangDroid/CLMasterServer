@@ -6,7 +6,7 @@ import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.Node
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeAliveResponseDto
-import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
+import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import org.springframework.beans.factory.annotation.Autowired
@@ -115,9 +115,9 @@ class NodeService {
      * getNodeLoad(): Get All of load information, in registered node on master's db.
      * returns: List of <NodeLoadResponseDto>[Containing Region, Load Info]
      */
-    fun getNodeLoad(): List<NodeLoadResponseDto> {
+    fun getNodeInformation(): List<NodeInformationResponseDto> {
         return nodeRepository.findAll().stream()
-            .map { NodeLoadResponseDto(it, restTemplate) }
+            .map { NodeInformationResponseDto(it, restTemplate) }
             .collect(Collectors.toList())
     }
 

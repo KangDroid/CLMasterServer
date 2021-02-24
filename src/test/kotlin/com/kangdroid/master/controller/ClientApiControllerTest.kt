@@ -3,7 +3,7 @@ package com.kangdroid.master.controller
 import com.kangdroid.master.config.TestConfiguration
 import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.node.NodeRepository
-import com.kangdroid.master.data.node.dto.NodeLoadResponseDto
+import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.UserRepository
@@ -166,7 +166,7 @@ class ClientApiControllerTest {
     @Test
     fun isGettingNodeLoadWorking() {
         // URL
-        val urlFinal: String = "$baseUrl:$port/api/client/node/load"
+        val urlFinal: String = "$baseUrl:$port/api/client/node"
         // save node first
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
             id = 10,
@@ -179,12 +179,12 @@ class ClientApiControllerTest {
         var returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
 
         // Request
-        val responseLoad: ResponseEntity<Array<NodeLoadResponseDto>> =
-            testRestTemplate.getForEntity(urlFinal, Array<NodeLoadResponseDto>::class)
-        assertThat(responseLoad.body).isNotEqualTo(null) // Check for null
+        val responseInformation: ResponseEntity<Array<NodeInformationResponseDto>> =
+            testRestTemplate.getForEntity(urlFinal, Array<NodeInformationResponseDto>::class)
+        assertThat(responseInformation.body).isNotEqualTo(null) // Check for null
 
         // Get Response Value
-        val responseValue: Array<NodeLoadResponseDto> = responseLoad.body!!
+        val responseValue: Array<NodeInformationResponseDto> = responseInformation.body!!
         for (loadDto in responseValue) {
             assertThat(loadDto.regionName).isNotEqualTo("")
             assertThat(loadDto.nodeLoadPercentage).isNotEqualTo("")
