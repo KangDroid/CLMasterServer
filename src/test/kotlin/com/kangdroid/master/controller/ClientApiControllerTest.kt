@@ -240,7 +240,7 @@ class ClientApiControllerTest {
     @Test
     fun isRegisteringUserWorksWell() {
         // Let
-        val finalUrl: String = "$baseUrl:$port/api/client/register"
+        val finalUrl: String = "$baseUrl:$port/api/client"
         val userRegisterDto: UserRegisterDto = UserRegisterDto(
             userName = "testing",
             userPassword = "testing_password"
@@ -259,7 +259,7 @@ class ClientApiControllerTest {
     @Test
     fun isLoggingInWorksWell() {
         // Register First
-        val registerUrl: String = "$baseUrl:$port/api/client/register"
+        val registerUrl: String = "$baseUrl:$port/api/client"
         val userRegisterDto: UserRegisterDto = UserRegisterDto(
             userName = "testing",
             userPassword = "testing_password"

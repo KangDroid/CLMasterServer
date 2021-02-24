@@ -67,7 +67,7 @@ class ClientApiController {
      * Returns: Registered Id with userRegisterResponseDto
      * Returns: errorMessage With userRegisterResponseDto
      */
-    @PostMapping("/api/client/register")
+    @PostMapping("/api/client")
     fun registerUser(@RequestBody userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
         return userService.registerUser(userRegisterDto)
     }
