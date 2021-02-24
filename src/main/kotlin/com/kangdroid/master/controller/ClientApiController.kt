@@ -41,12 +41,12 @@ class ClientApiController {
     /**
      * getNodeListUser(param token) Get List of node for corresponding user.
      */
-    @GetMapping("/api/client/node")
-    fun getNodeListUser(@RequestHeader("userToken") userToken: String): List<UserImageListResponseDto> {
+    @GetMapping("/api/client/container")
+    fun getClientContainerList(@RequestHeader("userToken") userToken: String): List<UserImageListResponseDto> {
         if (!userService.checkToken(userToken)) {
             return listOf<UserImageListResponseDto>(UserImageListResponseDto(errorMessage = "Token is Invalid. Please Re-Login"))
         }
-        return userService.listNode(userToken)
+        return userService.listContainer(userToken)
     }
 
     /**

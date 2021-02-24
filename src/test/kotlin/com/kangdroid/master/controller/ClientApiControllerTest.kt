@@ -350,8 +350,8 @@ class ClientApiControllerTest {
     }
 
     @Test
-    fun isNodeListingWorksWell() {
-        val finalUrl: String = "$baseUrl:$port/api/client/node"
+    fun isContainerListingWorksWell() {
+        val finalUrl: String = "$baseUrl:$port/api/client/container"
         val loginToken: String = registerDemoUser()
 
         // Set HTTP Headers
