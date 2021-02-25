@@ -1,22 +1,11 @@
 package com.kangdroid.master.data.user
 
 import com.kangdroid.master.data.docker.DockerImage
-import org.springframework.security.core.userdetails.UserDetails
-import javax.persistence.*
-import java.util.stream.Collectors
-
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-
 import org.springframework.security.core.GrantedAuthority
-
-import java.util.ArrayList
-
-import javax.persistence.FetchType
-
-import javax.persistence.ElementCollection
-
-
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
+import java.util.stream.Collectors
+import javax.persistence.*
 
 @Entity
 class User(
@@ -44,7 +33,7 @@ class User(
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = [CascadeType.ALL])
     var dockerImage: MutableList<DockerImage> = mutableListOf()
-): UserDetails {
+) : UserDetails {
 
     override fun getAuthorities(): Collection<GrantedAuthority?>? {
         return roles.stream()
@@ -56,27 +45,10 @@ class User(
             .collect(Collectors.toList())
     }
 
-    override fun getPassword(): String {
-        return userPassword
-    }
-
-    override fun getUsername(): String? {
-        return email
-    }
-
-    override fun isAccountNonExpired(): Boolean {
-        return true
-    }
-
-    override fun isAccountNonLocked(): Boolean {
-        return true
-    }
-
-    override fun isCredentialsNonExpired(): Boolean {
-        return true
-    }
-
-    override fun isEnabled(): Boolean {
-        return true
-    }
+    override fun getPassword() = userPassword
+    override fun getUsername(): String? = email
+    override fun isAccountNonExpired(): Boolean = true
+    override fun isAccountNonLocked(): Boolean = true
+    override fun isCredentialsNonExpired(): Boolean = true
+    override fun isEnabled(): Boolean = true
 }
