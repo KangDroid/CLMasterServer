@@ -61,12 +61,12 @@ class NodeService {
 
         // Request compute-node to create a fresh container
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
-        val responseEntity: ResponseEntity<UserImageResponseDto> = try {
+        val responseEntity: ResponseEntity<UserImageResponseDto> = kotlin.runCatching<ResponseEntity<UserImageResponseDto>> {
             restTemplate.postForEntity(url, UserImageResponseDto::class.java)
-        } catch (e: Exception) {
-            println(e.stackTraceToString())
-            return UserImageResponseDto(errorMessage = "Cannot communicate with Compute node!")
-        }
+        }.onFailure {
+            println(it.stackTraceToString())
+        }.getOrNull() ?: return UserImageResponseDto(errorMessage = "Cannot communicate with Compute node!")
+
         val userImageResponseDto: UserImageResponseDto = responseEntity.body!!
         userImageResponseDto.regionLocation = userImageSaveRequestDto.computeRegion
 
@@ -97,12 +97,11 @@ class NodeService {
 
         val requestDto: restartRequestDto = restartRequestDto(dockerImage.dockerId)
 
-        val responseEntity: ResponseEntity<String> = try {
+        val responseEntity: ResponseEntity<String> = runCatching {
             restTemplate.postForEntity(url, requestDto, String::class.java)
-        } catch (e: Exception) {
-            println(e.stackTraceToString())
-            return "Cannot communicate with Compute node!"
-        }
+        }.onFailure {
+            println(it.stackTraceToString())
+        }.getOrNull() ?: return "Cannot communicate with Compute node!"
 
         if (responseEntity.hasBody()) {
             return responseEntity.body!!
@@ -160,12 +159,12 @@ class NodeService {
      */
     private fun isNodeRunning(nodeSaveRequestDto: NodeSaveRequestDto): Cause {
         val url: String = "http://${nodeSaveRequestDto.ipAddress}:${nodeSaveRequestDto.hostPort}/api/alive"
-        val responseEntity: ResponseEntity<NodeAliveResponseDto> = try {
+        val responseEntity: ResponseEntity<NodeAliveResponseDto> = runCatching{
             restTemplate.getForEntity(url, NodeAliveResponseDto::class.java)
-        } catch (e: Exception) {
-            println(e.stackTraceToString())
-            return Cause(value = false, cause = "Connecting to Node Server failed. Check for IP/Port again.")
-        }
+        }.onFailure {
+            println(it.stackTraceToString())
+        }.getOrNull() ?: return Cause(value = false, cause = "Connecting to Node Server failed. Check for IP/Port again.")
+
         val response: NodeAliveResponseDto = responseEntity.body!!
 
         return Cause(
