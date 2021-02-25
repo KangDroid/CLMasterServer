@@ -2,6 +2,7 @@ package com.kangdroid.master.controller
 
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
+import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.security.JWTTokenProvider
 import com.kangdroid.master.service.PasswordEncryptorService
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,13 +23,26 @@ class NewUserController(
 
     // Just for testing with postman
     @PostMapping("/join")
-    fun join(@RequestBody user: Map<String, String>): Long {
-        return userRepository.save(User(
-            email = user.get("email")!!,
-            userPassword = passwordEncoder.encodePlainText(user.get("password")!!),
-            roles = setOf("ROLE_USER"),
-            userName = ""
-        )).id
+    fun join(@RequestBody user: Map<String, String>): UserRegisterResponseDto {
+        runCatching {
+            userRepository.save(User(
+                email = user.get("email")!!,
+                userPassword = passwordEncoder.encodePlainText(user.get("password")!!),
+                roles = setOf("ROLE_USER"),
+                userName = ""
+            ))
+        }.onSuccess {
+            return UserRegisterResponseDto(
+                registeredId = it.email,
+                errorMessage = ""
+            )
+        }.onFailure {
+            return UserRegisterResponseDto(errorMessage = "${it.message}")
+        }
+
+        return UserRegisterResponseDto(
+            errorMessage = "Possible?"
+        )
     }
 
     @PostMapping("/login")
