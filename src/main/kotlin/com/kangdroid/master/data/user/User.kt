@@ -19,12 +19,6 @@ class User(
     @Column(length = 500, nullable = false)
     var userPassword: String,
 
-    @Column(length = 500, nullable = true)
-    var userToken: String = "",
-
-    @Column(length = 500, nullable = true)
-    var userTokenExp: Long = 0,
-
     @ElementCollection(fetch = FetchType.EAGER)
     val roles: Set<String> = setOf(),
 

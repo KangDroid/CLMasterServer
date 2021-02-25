@@ -5,15 +5,10 @@ import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.*
+import com.kangdroid.master.security.JWTTokenProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.security.MessageDigest
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
-import javax.annotation.PreDestroy
-import javax.xml.bind.DatatypeConverter
-import kotlin.concurrent.schedule
 
 @Service
 class UserService {
@@ -21,24 +16,21 @@ class UserService {
     private lateinit var userRepository: UserRepository
 
     @Autowired
-    private lateinit var passwordEncryptorService: PasswordEncryptorService
-
-    @Autowired
     private lateinit var nodeService: NodeService
 
-    // Timer Class
-    private val timer: Timer = Timer()
+    @Autowired
+    private lateinit var jwtTokenProvider: JWTTokenProvider
 
-    // Token Expiration Time in Milliseconds
-    private val tokenExpireTime: Long = 1000 * 60 * 3 // 60s
+    fun getUserName(token: String): String? {
+        var userName: String? = null
+        runCatching {
+            userName = jwtTokenProvider.getUserPk(token)
+        }.onFailure {
+            println(it.stackTraceToString())
+            userName = null
+        }
 
-    // HashMap for token
-    private val tokenHashMap: ConcurrentMap<String, TimerTask> = ConcurrentHashMap()
-
-    @PreDestroy
-    fun clearTime() {
-        timer.cancel()
-        timer.purge()
+        return userName
     }
 
     /**
@@ -47,7 +39,9 @@ class UserService {
      * Returns: An Error Message
      */
     fun saveWithCheck(token: String, userImageResponseDto: UserImageResponseDto): String {
-        val user: User = userRepository.findByUserToken(token)
+        val userName: String = getUserName(token)
+            ?: return "Cannot Find User. Please Re-Login"
+        val user: User = userRepository.findByUserName(userName)
             ?: return "Cannot Find User. Please Re-Login"
 
         user.dockerImage.add(
@@ -67,7 +61,11 @@ class UserService {
      * Returns One DTO with errorMessage.
      */
     fun listContainer(userToken: String): List<UserImageListResponseDto> {
-        val user: User = userRepository.findByUserToken(userToken)
+        val userName: String = getUserName(userToken)
+            ?: return listOf(
+                UserImageListResponseDto("", "", "", "Cannot Find User. Please Re-Login")
+            )
+        val user: User = userRepository.findByUserName(userName)
             ?: return listOf(
                 UserImageListResponseDto("", "", "", "Cannot Find User. Please Re-Login")
             )
@@ -87,112 +85,12 @@ class UserService {
     }
 
     /**
-     * checkToken(): Check token is valid
-     * Returns: True when token is valid
-     * Returns: False when token is invalid
-     */
-    fun checkToken(token: String): Boolean {
-        return (userRepository.findByUserToken(token) != null)
-    }
-
-    /**
-     * registerUser(param userRegisterDto): Register User with data userRegisterDto
-     * returns: UserRegisterResponseDto with Registered ID
-     * returns: UserRegisterResponseDto with Error Message
-     */
-    fun registerUser(userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
-        // Assert if duplicate username exists
-        if (userRepository.findByUserName(userRegisterDto.userName) != null) {
-            return UserRegisterResponseDto(errorMessage = "ID: ${userRegisterDto.userName} exists!")
-        }
-
-        // Save!
-        userRepository.save(
-            User(
-                id = 0,
-                userName = userRegisterDto.userName,
-                userPassword = passwordEncryptorService.encodePlainText(userRegisterDto.userPassword),
-            )
-        )
-
-        return UserRegisterResponseDto(userRegisterDto.userName, "")
-    }
-
-    /**
-     * login(param userImageLoginRequestDto): Log-In, Create Custom Session Token
-     * Returns: Full UserImageLoginResponse with Session Token
-     * Returns: UserImageLoginResponse with Error Message in it.
-     */
-    fun login(userLoginRequestDto: UserLoginRequestDto, ip: String): UserLoginResponseDto {
-        val errorMessage: String = "Either ID/PW is Incorrect!"
-        // 1. Get User Information
-        val user: User = userRepository.findByUserName(userLoginRequestDto.userName)
-            ?: return UserLoginResponseDto(errorMessage = errorMessage)
-
-        // 2. Check whether requested PW equals DB's Password
-        return if (passwordEncryptorService.isMatching(userLoginRequestDto.userPassword, user.userPassword)) {
-
-            // Token Already Exists, invalidate current token and re-register token.
-            if (user.userToken != "") {
-                // Cancel Scheduled Job first
-                if (tokenHashMap.containsKey(user.userToken)) {
-                    tokenHashMap[user.userToken]!!.cancel()
-                } else {
-                    println("TimerTask Does not exists for token: ${user.userToken}")
-                }
-
-                // invalidate
-                user.userToken = ""
-            }
-
-            // Create Token
-            user.userToken = createToken(user, ip)
-            user.userTokenExp = System.currentTimeMillis() + tokenExpireTime
-
-            // Expiration Task
-            tokenHashMap[user.userToken] = timer.schedule(Date(user.userTokenExp)) {
-                println("Token Expired!")
-                user.userToken = ""
-                user.userTokenExp = 0
-                userRepository.save(user)
-            }
-
-            // Anyway - Edit Db[Save Token]
-            userRepository.save(user) // edit db
-            UserLoginResponseDto(token = user.userToken)
-        } else {
-            UserLoginResponseDto(errorMessage = errorMessage)
-        }
-    }
-
-    /**
-     * Create Token based on: User Name, Password, Current Server Time, Expiration Time, Ip
-     */
-    fun createToken(user: User, ip: String): String {
-        val finalString: String = getSHA512(user.userName) + getSHA512(user.userPassword) +
-                getSHA512(ip) + getSHA512(System.currentTimeMillis().toString())
-        val finalArray: CharArray = finalString.toCharArray()
-        finalArray.shuffle()
-
-        return getSHA512(finalArray.joinToString(""))
-    }
-
-    /**
-     * getSHA512(param input): Create SHA-256 String
-     * returns: SHA-256 String
-     */
-    fun getSHA512(input: String): String {
-        val messageDigest: MessageDigest = MessageDigest.getInstance("SHA-512").also {
-            it.update(input.toByteArray())
-        }
-        return DatatypeConverter.printHexBinary(messageDigest.digest())
-    }
-
-    /**
      * RestartContainer(): Restart Corresponding Container
      */
     fun restartContainer(userRestartRequestDto: UserRestartRequestDto): UserRestartResponseDto {
-        val user: User = userRepository.findByUserToken(userRestartRequestDto.userToken)
+        val userName: String = getUserName(userRestartRequestDto.userToken)
+            ?: return UserRestartResponseDto(errorMessage = "Cannot find user with token!")
+        val user: User = userRepository.findByUserName(userName)
             ?: return UserRestartResponseDto(errorMessage = "Cannot find user with token!")
         val dockerImageList: MutableList<DockerImage> = user.dockerImage
         val targetDockerImage: DockerImage = dockerImageList.find {

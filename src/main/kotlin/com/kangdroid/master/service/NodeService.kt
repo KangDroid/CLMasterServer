@@ -24,9 +24,6 @@ class NodeService {
     private lateinit var nodeRepository: NodeRepository
 
     @Autowired
-    private lateinit var passwordEncryptorService: PasswordEncryptorService
-
-    @Autowired
     private lateinit var userService: UserService
 
     // Global Rest Template

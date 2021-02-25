@@ -13,7 +13,4 @@ interface UserRepository : JpaRepository<User, Long> {
 
     @Transactional(readOnly = true)
     fun findByUserPassword(input: String): User?
-
-    @Transactional(readOnly = true)
-    fun findByUserToken(input: String): User?
 }
