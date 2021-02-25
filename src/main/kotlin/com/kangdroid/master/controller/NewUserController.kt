@@ -5,7 +5,9 @@ import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.security.JWTTokenProvider
 import com.kangdroid.master.service.PasswordEncryptorService
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -24,6 +26,7 @@ class NewUserController(
     // Just for testing with postman
     @PostMapping("/join")
     fun join(@RequestBody user: Map<String, String>): UserRegisterResponseDto {
+        lateinit var userRegisterResponseDto: UserRegisterResponseDto
         runCatching {
             userRepository.save(User(
                 email = user.get("email")!!,
@@ -32,17 +35,19 @@ class NewUserController(
                 userName = ""
             ))
         }.onSuccess {
-            return UserRegisterResponseDto(
+            userRegisterResponseDto = UserRegisterResponseDto(
                 registeredId = it.email,
                 errorMessage = ""
             )
         }.onFailure {
-            return UserRegisterResponseDto(errorMessage = "${it.message}")
+            userRegisterResponseDto = if (it.cause is ConstraintViolationException) {
+                UserRegisterResponseDto(errorMessage = "E-Mail address is already registered!")
+            } else {
+                UserRegisterResponseDto(errorMessage = "Unknown Throw: ${it.cause.toString()}")
+            }
         }
 
-        return UserRegisterResponseDto(
-            errorMessage = "Possible?"
-        )
+        return userRegisterResponseDto
     }
 
     @PostMapping("/login")
