@@ -52,11 +52,9 @@ class JWTTokenProvider(private val userDetailsService: UserDetailsService) {
     }
 
     fun validateToken(jwtToken: String): Boolean {
-        return try {
+        return kotlin.runCatching {
             val tmpClaims: Jws<Claims> = Jwts.parser().setSigningKey(testInnerPassword).parseClaimsJws(jwtToken)
             !tmpClaims.body.expiration.before(Date())
-        } catch (e: Exception) {
-            false
-        }
+        }.getOrDefault(false)
     }
 }
