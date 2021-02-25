@@ -2,6 +2,7 @@ package com.kangdroid.master.controller
 
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
+import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.security.JWTTokenProvider
 import com.kangdroid.master.service.PasswordEncryptorService
@@ -25,18 +26,17 @@ class NewUserController(
 
     // Just for testing with postman
     @PostMapping("/join")
-    fun join(@RequestBody user: Map<String, String>): UserRegisterResponseDto {
+    fun join(@RequestBody userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
         lateinit var userRegisterResponseDto: UserRegisterResponseDto
         runCatching {
             userRepository.save(User(
-                email = user.get("email")!!,
-                userPassword = passwordEncoder.encodePlainText(user.get("password")!!),
-                roles = setOf("ROLE_USER"),
-                userName = ""
+                userName = userRegisterDto.userName,
+                userPassword = passwordEncoder.encodePlainText(userRegisterDto.userPassword),
+                roles = setOf("ROLE_USER")
             ))
         }.onSuccess {
             userRegisterResponseDto = UserRegisterResponseDto(
-                registeredId = it.email,
+                registeredId = it.userName,
                 errorMessage = ""
             )
         }.onFailure {
@@ -52,12 +52,10 @@ class NewUserController(
 
     @PostMapping("/login")
     fun login(@RequestBody user: Map<String, String>): String {
-        val member = userRepository.findByEmail(user["email"]!!)
-            .orElseThrow {
-                IllegalArgumentException(
-                    "Unknown Email Address"
-                )
-            }
+        val member = userRepository.findByUserName(user["email"]!!)
+            ?: throw IllegalArgumentException(
+                "Unknown Email Address"
+            )
         require(passwordEncoder.isMatching(user["password"]!!, member.password)) { "Wrong Password" }
         return jwtTokenProvider.createToken(member.username!!, member.roles.toList())
     }

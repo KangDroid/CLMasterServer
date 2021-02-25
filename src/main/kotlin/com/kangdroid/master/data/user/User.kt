@@ -13,7 +13,7 @@ class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = Long.MAX_VALUE,
 
-    @Column(length = 500, nullable = false)
+    @Column(length = 500, nullable = false, unique = true)
     var userName: String,
 
     @Column(length = 500, nullable = false)
@@ -24,9 +24,6 @@ class User(
 
     @Column(length = 500, nullable = true)
     var userTokenExp: Long = 0,
-
-    @Column(length = 500, nullable = false, unique = true)
-    var email: String = "",
 
     @ElementCollection(fetch = FetchType.EAGER)
     val roles: Set<String> = setOf(),
@@ -46,7 +43,7 @@ class User(
     }
 
     override fun getPassword() = userPassword
-    override fun getUsername(): String? = email
+    override fun getUsername(): String? = userName
     override fun isAccountNonExpired(): Boolean = true
     override fun isAccountNonLocked(): Boolean = true
     override fun isCredentialsNonExpired(): Boolean = true
