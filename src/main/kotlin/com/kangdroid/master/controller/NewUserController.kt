@@ -2,6 +2,8 @@ package com.kangdroid.master.controller
 
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
+import com.kangdroid.master.data.user.dto.UserLoginRequestDto
+import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.security.JWTTokenProvider
@@ -51,12 +53,22 @@ class NewUserController(
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody user: Map<String, String>): String {
-        val member = userRepository.findByUserName(user["email"]!!)
-            ?: throw IllegalArgumentException(
-                "Unknown Email Address"
+    fun login(@RequestBody userLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {
+        val user: User = userRepository.findByUserName(userLoginRequestDto.userName)
+            ?: return UserLoginResponseDto(
+                errorMessage = "Cannot find user: ${userLoginRequestDto.userName}"
             )
-        require(passwordEncoder.isMatching(user["password"]!!, member.password)) { "Wrong Password" }
-        return jwtTokenProvider.createToken(member.username!!, member.roles.toList())
+
+        runCatching {
+            require(passwordEncoder.isMatching(userLoginRequestDto.userPassword, user.password)) { "Wrong Password" }
+        }.onFailure {
+            return UserLoginResponseDto(
+                errorMessage = "Password is incorrect!"
+            )
+        }
+
+        return UserLoginResponseDto(
+            token = jwtTokenProvider.createToken(userLoginRequestDto.userName, user.roles.toList())
+        )
     }
 }
