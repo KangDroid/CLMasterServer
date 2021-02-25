@@ -19,12 +19,6 @@ import java.lang.Exception
 @EnableWebSecurity
 class SecurityConfig(private val jwtTokenProvider: JWTTokenProvider) : WebSecurityConfigurerAdapter() {
 
-    // Register bean for passwordEncoder
-    @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder()
-    }
-
     // Register authenticationManagerBean.
     @Bean
     override fun authenticationManagerBean(): AuthenticationManager {

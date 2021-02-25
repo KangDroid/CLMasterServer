@@ -3,6 +3,8 @@ package com.kangdroid.master.controller
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.security.JWTTokenProvider
+import com.kangdroid.master.service.PasswordEncryptorService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -11,17 +13,19 @@ import java.util.*
 
 @RestController
 class NewUserController(
-    private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JWTTokenProvider,
     private val userRepository: UserRepository
 ) {
+
+    @Autowired
+    private lateinit var passwordEncoder: PasswordEncryptorService
 
     // Just for testing with postman
     @PostMapping("/join")
     fun join(@RequestBody user: Map<String, String>): Long {
         return userRepository.save(User(
             email = user.get("email")!!,
-            userPassword = passwordEncoder.encode(user.get("password")),
+            userPassword = passwordEncoder.encodePlainText(user.get("password")!!),
             roles = setOf("ROLE_USER"),
             userName = ""
         )).id
@@ -35,7 +39,7 @@ class NewUserController(
                     "Unknown Email Address"
                 )
             }
-        require(passwordEncoder.matches(user["password"], member.password)) { "Wrong Password" }
+        require(passwordEncoder.isMatching(user["password"]!!, member.password)) { "Wrong Password" }
         return jwtTokenProvider.createToken(member.username!!, member.roles.toList())
     }
 }
