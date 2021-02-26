@@ -27,7 +27,7 @@ class NewUserController(
     private lateinit var passwordEncoder: PasswordEncryptorService
 
     // Just for testing with postman
-    @PostMapping("/join")
+    @PostMapping("/api/client/register")
     fun join(@RequestBody userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
         lateinit var userRegisterResponseDto: UserRegisterResponseDto
         runCatching {
@@ -52,7 +52,7 @@ class NewUserController(
         return userRegisterResponseDto
     }
 
-    @PostMapping("/login")
+    @PostMapping("/api/client/login")
     fun login(@RequestBody userLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {
         val user: User = userRepository.findByUserName(userLoginRequestDto.userName)
             ?: return UserLoginResponseDto(
