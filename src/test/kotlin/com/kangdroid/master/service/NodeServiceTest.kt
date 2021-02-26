@@ -57,9 +57,6 @@ class NodeServiceTest {
     @Autowired
     private lateinit var testConfiguration: TestConfiguration
 
-    @Autowired
-    private lateinit var dockerImageRepository: DockerImageRepository
-
     // Mock Rest Service
     private lateinit var mockServer: MockRestServiceServer
     private lateinit var clientHttpRequestFactory: ClientHttpRequestFactory // For getting real server one
