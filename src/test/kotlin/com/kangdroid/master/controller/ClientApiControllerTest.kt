@@ -30,8 +30,7 @@ import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.client.ExpectedCount.manyTimes
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.test.web.client.match.MockRestRequestMatchers.method
-import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.match.MockRestRequestMatchers.*
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
@@ -198,6 +197,10 @@ class ClientApiControllerTest {
         // URL
         val urlFinal: String = "$baseUrl:$port/api/client/container"
 
+        // HttpHeader
+        val httpHeaders: HttpHeaders = HttpHeaders()
+        httpHeaders.add("X-AUTH-TOKEN", loginToken)
+
         // save node first
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
             id = 10,
@@ -218,7 +221,7 @@ class ClientApiControllerTest {
 
         // do work[Successful Operation]
         var responseEntity: ResponseEntity<UserImageResponseDto> =
-            testRestTemplate.postForEntity(urlFinal, userImageSaveRequestDto, UserImageResponseDto::class)
+            testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
         var responseValue: UserImageResponseDto = responseEntity.body!!
         assertThat((responseValue.errorMessage)).isEqualTo("")
@@ -229,73 +232,21 @@ class ClientApiControllerTest {
 
         // do work[Failure: Wrong Token]
         userImageSaveRequestDto.userToken = ""
-        responseEntity = testRestTemplate.postForEntity(urlFinal, userImageSaveRequestDto, UserImageResponseDto::class)
+        httpHeaders.clear()
+        responseEntity = testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
 
         responseValue = responseEntity.body!!
         assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
-    }
 
-    @Test
-    fun isRegisteringUserWorksWell() {
-        // Let
-        val finalUrl: String = "$baseUrl:$port/api/client"
-        val userRegisterDto: UserRegisterDto = UserRegisterDto(
-            userName = "testing",
-            userPassword = "testing_password"
-        )
-
-        // do work
-        val responseEntity: ResponseEntity<UserRegisterResponseDto> =
-            testRestTemplate.postForEntity(finalUrl, userRegisterDto, UserRegisterResponseDto::class)
+        // do work[Failure: No Token]
+        httpHeaders.clear()
+        httpHeaders.add("X-AUTH-TOKEN", "wrong_token")
+        responseEntity = testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
 
-        val responseValue: UserRegisterResponseDto = responseEntity.body!!
-        assertThat(responseValue.errorMessage).isEqualTo("")
-        assertThat(responseValue.registeredId).isEqualTo(userRegisterDto.userName)
-    }
-
-    @Test
-    fun isLoggingInWorksWell() {
-        // Register First
-        val registerUrl: String = "$baseUrl:$port/api/client"
-        val userRegisterDto: UserRegisterDto = UserRegisterDto(
-            userName = "testing",
-            userPassword = "testing_password"
-        )
-
-        // do work
-        val registerResponseEntity: ResponseEntity<UserRegisterResponseDto> =
-            testRestTemplate.postForEntity(registerUrl, userRegisterDto, UserRegisterResponseDto::class)
-
-        // Let
-        val finalUrl: String = "$baseUrl:$port/api/client/login"
-        val userLoginRequestDto: UserLoginRequestDto = UserLoginRequestDto(
-            userName = userRegisterDto.userName,
-            userPassword = userRegisterDto.userPassword
-        )
-
-        // Do Post
-        var responseEntity: ResponseEntity<UserLoginResponseDto> =
-            testRestTemplate.postForEntity(finalUrl, userLoginRequestDto, UserLoginResponseDto::class)
-        assertThat(responseEntity.body).isNotEqualTo(null)
-        var responseValue: UserLoginResponseDto = responseEntity.body!!
-        assertThat(responseValue.errorMessage).isEqualTo("")
-        assertThat(responseValue.token).isNotEqualTo("")
-
-        // Without X-FORWARDED-FOR
-        val headers: HttpHeaders = HttpHeaders()
-        headers.set("X-FORWARDED-FOR", null)
-
-        // Set Entity
-        val entity: HttpEntity<UserLoginRequestDto> = HttpEntity<UserLoginRequestDto>(userLoginRequestDto, headers)
-
-        // Request[Successful one]
-        responseEntity = testRestTemplate.exchange(finalUrl, HttpMethod.POST, entity, UserLoginResponseDto::class)
-        assertThat(responseEntity.body).isNotEqualTo(null)
         responseValue = responseEntity.body!!
-        assertThat(responseValue.errorMessage).isEqualTo("")
-        assertThat(responseValue.token).isNotEqualTo("")
+        assertThat(responseValue.errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
     }
 
     @Test
@@ -328,21 +279,47 @@ class ClientApiControllerTest {
 
         // Restart Request Dto
         val userRestartRequestDto: UserRestartRequestDto = UserRestartRequestDto(
-            userToken = loginToken,
+            userToken = "",
             containerId = userImageResponseDto.containerId
         )
 
         // Request
+        val httpHeaders: HttpHeaders = HttpHeaders()
+        httpHeaders.add("X-AUTH-TOKEN", loginToken)
         var responseEntity: ResponseEntity<UserRestartResponseDto> =
-            testRestTemplate.postForEntity(restartUrl, userRestartRequestDto, UserRestartResponseDto::class)
+            testRestTemplate.exchange(
+                restartUrl,
+                HttpMethod.POST,
+                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders),
+                UserRestartResponseDto::class
+            )
         assertThat(responseEntity.body).isNotEqualTo(null)
         var responseValue: UserRestartResponseDto = responseEntity.body!!
         assertThat(responseValue.errorMessage).isEqualTo("")
 
         // Request[Failure: Wrong Token]
-        userRestartRequestDto.userToken = ""
+        httpHeaders.clear()
+        httpHeaders.add("X-AUTH-TOKEN", "testingToken")
         responseEntity =
-            testRestTemplate.postForEntity(restartUrl, userRestartRequestDto, UserRestartResponseDto::class)
+            testRestTemplate.exchange(
+                restartUrl,
+                HttpMethod.POST,
+                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders),
+                UserRestartResponseDto::class
+            )
+        assertThat(responseEntity.body).isNotEqualTo(null)
+        responseValue = responseEntity.body!!
+        assertThat(responseValue.errorMessage).isEqualTo("Cannot find user with token!")
+
+        // Request[Failure: Without token]
+        httpHeaders.clear()
+        responseEntity =
+            testRestTemplate.exchange(
+                restartUrl,
+                HttpMethod.POST,
+                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders),
+                UserRestartResponseDto::class
+            )
         assertThat(responseEntity.body).isNotEqualTo(null)
         responseValue = responseEntity.body!!
         assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
@@ -355,7 +332,7 @@ class ClientApiControllerTest {
 
         // Set HTTP Headers
         val headers: HttpHeaders = HttpHeaders()
-        headers.set("userToken", loginToken)
+        headers.set("X-AUTH-TOKEN", loginToken)
 
         // Set Entity
         val entity: HttpEntity<String> = HttpEntity<String>(headers)
@@ -369,7 +346,7 @@ class ClientApiControllerTest {
         assertThat(responseValue.size).isEqualTo(0)
 
         // Request[Failure: Wrong Token]
-        headers.set("userToken", "a")
+        headers.set("X-AUTH-TOKEN", "a")
         responseEntity =
             testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
@@ -377,6 +354,5 @@ class ClientApiControllerTest {
         responseValue = responseEntity.body!!
         assertThat(responseValue.size).isEqualTo(1)
         assertThat(responseValue[0].errorMessage).isNotEqualTo("")
-        assertThat(responseValue[0].errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
     }
 }
