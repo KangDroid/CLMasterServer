@@ -18,10 +18,12 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
-class NewUserController(
-    private val jwtTokenProvider: JWTTokenProvider,
-    private val userRepository: UserRepository
-) {
+class NewUserController{
+    @Autowired
+    private lateinit var jwtTokenProvider: JWTTokenProvider
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
 
     @Autowired
     private lateinit var passwordEncoder: PasswordEncryptorService
