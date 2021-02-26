@@ -21,15 +21,6 @@ import java.util.*
 @RestController
 class NewUserController{
     @Autowired
-    private lateinit var jwtTokenProvider: JWTTokenProvider
-
-    @Autowired
-    private lateinit var userRepository: UserRepository
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncryptorService
-
-    @Autowired
     private lateinit var userService: UserService
 
     // Just for testing with postman
