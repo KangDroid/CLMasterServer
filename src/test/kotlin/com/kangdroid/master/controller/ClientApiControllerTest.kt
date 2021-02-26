@@ -165,6 +165,27 @@ class ClientApiControllerTest {
     }
 
     @Test
+    fun isLoginWorking() {
+        val registerUrl: String = "$baseUrl:$port/api/client/register"
+
+        val userRegisterDto: UserRegisterDto = UserRegisterDto(
+            userName = "testUser",
+            userPassword = "testPassword"
+        )
+        testRestTemplate.postForEntity<UserRegisterResponseDto>(registerUrl, userRegisterDto, UserRegisterResponseDto::class)
+
+        val finalUrl: String = "$baseUrl:$port/api/client/login"
+        val userLoginRequestDto: UserLoginRequestDto = UserLoginRequestDto(
+            userName = userRegisterDto.userName,
+            userPassword = userRegisterDto.userPassword
+        )
+        val responseEntity: ResponseEntity<UserLoginResponseDto> =
+            testRestTemplate.postForEntity(finalUrl, userLoginRequestDto, UserLoginResponseDto::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+        assertThat(responseEntity.body!!.token).isNotEqualTo("")
+    }
+
+    @Test
     fun isMasterAliveWorking() {
         // This is trivial test though
         val urlFinal: String = "$baseUrl:$port/api/client/alive"
