@@ -122,12 +122,11 @@ class UserServiceTest {
         val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
 
         // Trying Login
-        val loginResponse: UserLoginResponseDto = userService.login(
+        val loginResponse: UserLoginResponseDto = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
             ),
-            "127.0.0.1" // self loopback
         )
 
         return loginResponse.token
@@ -145,9 +144,10 @@ class UserServiceTest {
         assertThat(registerResponse.errorMessage).isEqualTo("")
         assertThat(registerResponse.registeredId).isEqualTo(userRegisterDto.userName)
 
-        // Second Save, should fail.
+        // Do work[Failure: Username Exists!]
         registerResponse = userService.registerUser(userRegisterDto)
         assertThat(registerResponse.errorMessage).isNotEqualTo("")
+        assertThat(registerResponse.errorMessage).isEqualTo("E-Mail address is already registered!")
         assertThat(registerResponse.registeredId).isEqualTo("")
     }
 
@@ -164,50 +164,46 @@ class UserServiceTest {
         assertThat(registerResponse.errorMessage).isEqualTo("")
 
         // Trying Login
-        var loginResponse: UserLoginResponseDto = userService.login(
+        var loginResponse: UserLoginResponseDto = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
-            ),
-            "127.0.0.1" // self loopback
+            )
         )
 
         // Login Assert
         assertThat(loginResponse.errorMessage).isEqualTo("")
         assertThat(loginResponse.token).isNotEqualTo("")
 
-        // Re-Login so testing another token to be registered
+        // Re-Login for making sure same token is returned.
         val curToken: String = loginResponse.token
-        loginResponse = userService.login(
+        loginResponse = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
-            ),
-            "127.0.0.1" // self loopback
+            )
         )
 
         // Login Assert
         assertThat(loginResponse.errorMessage).isEqualTo("")
-        assertThat(loginResponse.token).isNotEqualTo(curToken)
+        assertThat(loginResponse.token).isEqualTo(curToken)
 
         // Wrong Login - ID
-        loginResponse = userService.login(
+        loginResponse = userService.loginUser(
             UserLoginRequestDto(
                 userName = "ID_INCORRECT",
                 userPassword = userRegisterDto.userPassword
-            ),
-            "127.0.0.1"
+            )
         )
         assertThat(loginResponse.errorMessage).isNotEqualTo("")
         assertThat(loginResponse.token).isEqualTo("")
 
         // Wrong Login - PW
-        loginResponse = userService.login(
+        loginResponse = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = "WrongPassword"
-            ),
-            "127.0.0.1"
+            )
         )
         assertThat(loginResponse.errorMessage).isNotEqualTo("")
         assertThat(loginResponse.token).isEqualTo("")
@@ -229,7 +225,9 @@ class UserServiceTest {
         assertThat(responseList[0].errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
 
         // With Some dummy image
-        val user: User? = userRepository.findByUserToken(loginToken)
+        val userName:String? = userService.getUserName(loginToken)
+        assertThat(userName).isNotEqualTo(null) // userName should not be equal
+        val user: User? = userRepository.findByUserName(userName!!)
         assertThat(user).isNotEqualTo(null)
         user!!.dockerImage.add(
             DockerImage(
@@ -243,24 +241,6 @@ class UserServiceTest {
         responseList = userService.listContainer(loginToken)
         assertThat(responseList.size).isEqualTo(1)
         assertThat(responseList[0].errorMessage).isEqualTo("")
-    }
-
-    @Test
-    fun isCheckingTokenWorksWell() {
-        val loginToken: String = registerDemoUser()
-
-        // CheckToken
-        assertThat(
-            userService.checkToken(
-                loginToken
-            )
-        ).isEqualTo(true)
-
-        assertThat(
-            userService.checkToken(
-                "loginResponse.token"
-            )
-        ).isEqualTo(false)
     }
 
     @Test
