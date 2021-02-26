@@ -24,6 +24,17 @@ class ClientApiController {
     @Autowired
     private lateinit var userService: UserService
 
+    // Just for testing with postman
+    @PostMapping("/api/client/register")
+    fun register(@RequestBody userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
+        return userService.registerUser(userRegisterDto)
+    }
+
+    @PostMapping("/api/client/login")
+    fun login(@RequestBody userLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {
+        return userService.loginUser(userLoginRequestDto)
+    }
+
     /**
      * getNodeLoad(): Get All of Registered Node Load as List.
      * Returns: List of <NodeLoadResponseDto>[containing Load information]
