@@ -40,21 +40,6 @@ class NewUserController{
 
     @PostMapping("/api/client/login")
     fun login(@RequestBody userLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {
-        val user: User = userRepository.findByUserName(userLoginRequestDto.userName)
-            ?: return UserLoginResponseDto(
-                errorMessage = "Cannot find user: ${userLoginRequestDto.userName}"
-            )
-
-        runCatching {
-            require(passwordEncoder.isMatching(userLoginRequestDto.userPassword, user.password)) { "Wrong Password" }
-        }.onFailure {
-            return UserLoginResponseDto(
-                errorMessage = "Password is incorrect!"
-            )
-        }
-
-        return UserLoginResponseDto(
-            token = jwtTokenProvider.createToken(userLoginRequestDto.userName, user.roles.toList())
-        )
+        return userService.loginUser(userLoginRequestDto)
     }
 }
