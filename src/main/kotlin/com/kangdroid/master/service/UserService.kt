@@ -6,6 +6,7 @@ import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.*
 import com.kangdroid.master.security.JWTTokenProvider
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -21,6 +22,9 @@ class UserService {
     @Autowired
     private lateinit var jwtTokenProvider: JWTTokenProvider
 
+    @Autowired
+    private lateinit var passwordEncoder: PasswordEncryptorService
+
     fun getUserName(token: String): String? {
         var userName: String? = null
         runCatching {
@@ -31,6 +35,30 @@ class UserService {
         }
 
         return userName
+    }
+
+    fun registerUser(userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
+        lateinit var userRegisterResponseDto: UserRegisterResponseDto
+        runCatching {
+            userRepository.save(User(
+                userName = userRegisterDto.userName,
+                userPassword = passwordEncoder.encodePlainText(userRegisterDto.userPassword),
+                roles = setOf("ROLE_USER")
+            ))
+        }.onSuccess {
+            userRegisterResponseDto = UserRegisterResponseDto(
+                registeredId = it.userName,
+                errorMessage = ""
+            )
+        }.onFailure {
+            userRegisterResponseDto = if (it.cause is ConstraintViolationException) {
+                UserRegisterResponseDto(errorMessage = "E-Mail address is already registered!")
+            } else {
+                UserRegisterResponseDto(errorMessage = "Unknown Throw: ${it.cause.toString()}")
+            }
+        }
+
+        return userRegisterResponseDto
     }
 
     /**

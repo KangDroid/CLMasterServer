@@ -8,6 +8,7 @@ import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.security.JWTTokenProvider
 import com.kangdroid.master.service.PasswordEncryptorService
+import com.kangdroid.master.service.UserService
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
@@ -28,30 +29,13 @@ class NewUserController{
     @Autowired
     private lateinit var passwordEncoder: PasswordEncryptorService
 
+    @Autowired
+    private lateinit var userService: UserService
+
     // Just for testing with postman
     @PostMapping("/api/client/register")
-    fun join(@RequestBody userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
-        lateinit var userRegisterResponseDto: UserRegisterResponseDto
-        runCatching {
-            userRepository.save(User(
-                userName = userRegisterDto.userName,
-                userPassword = passwordEncoder.encodePlainText(userRegisterDto.userPassword),
-                roles = setOf("ROLE_USER")
-            ))
-        }.onSuccess {
-            userRegisterResponseDto = UserRegisterResponseDto(
-                registeredId = it.userName,
-                errorMessage = ""
-            )
-        }.onFailure {
-            userRegisterResponseDto = if (it.cause is ConstraintViolationException) {
-                UserRegisterResponseDto(errorMessage = "E-Mail address is already registered!")
-            } else {
-                UserRegisterResponseDto(errorMessage = "Unknown Throw: ${it.cause.toString()}")
-            }
-        }
-
-        return userRegisterResponseDto
+    fun register(@RequestBody userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
+        return userService.registerUser(userRegisterDto)
     }
 
     @PostMapping("/api/client/login")
