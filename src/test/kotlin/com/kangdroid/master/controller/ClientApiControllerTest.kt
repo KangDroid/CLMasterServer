@@ -140,12 +140,11 @@ class ClientApiControllerTest {
         val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
 
         // Trying Login
-        val loginResponse: UserLoginResponseDto = userService.login(
+        val loginResponse: UserLoginResponseDto = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
             ),
-            "127.0.0.1" // self loopback
         )
 
         return loginResponse.token
