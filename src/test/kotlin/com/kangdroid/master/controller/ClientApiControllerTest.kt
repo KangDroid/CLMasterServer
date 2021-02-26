@@ -389,5 +389,15 @@ class ClientApiControllerTest {
         responseValue = responseEntity.body!!
         assertThat(responseValue.size).isEqualTo(1)
         assertThat(responseValue[0].errorMessage).isNotEqualTo("")
+
+        // Request[Failure: No Token]
+        headers.clear()
+        responseEntity =
+            testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        responseValue = responseEntity.body!!
+        assertThat(responseValue.size).isEqualTo(1)
+        assertThat(responseValue[0].errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
     }
 }
