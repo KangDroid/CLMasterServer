@@ -138,12 +138,11 @@ class NodeServiceTest {
         val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
 
         // Trying Login
-        val loginResponse: UserLoginResponseDto = userService.login(
+        val loginResponse: UserLoginResponseDto = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
             ),
-            "127.0.0.1" // self loopback
         )
 
         return loginResponse.token
@@ -295,7 +294,10 @@ class NodeServiceTest {
         val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
 
         // Find Docker Image Entity
-        val user: User = userRepository.findByUserToken(loginToken)!!
+        val userName: String? = userService.getUserName(loginToken)
+        assertThat(userName).isNotEqualTo(null) // username should not be equal
+
+        val user: User = userRepository.findByUserName(userName!!)!!
         lateinit var dockerImage: DockerImage
         for (dockerImageTest in user.dockerImage) {
             if (dockerImageTest.dockerId == userImageResponseDto.containerId) {
