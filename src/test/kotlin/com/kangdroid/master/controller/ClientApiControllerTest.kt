@@ -273,21 +273,14 @@ class ClientApiControllerTest {
 
         // do work[Failure: Wrong Token]
         userImageSaveRequestDto.userToken = ""
-        httpHeaders.clear()
-        responseEntity = testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
-        assertThat(responseEntity.body).isNotEqualTo(null)
-
-        responseValue = responseEntity.body!!
-        assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
+        var stringResponse: ResponseEntity<String> = testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, null), String::class)
+        assertThat(stringResponse.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
 
         // do work[Failure: No Token]
         httpHeaders.clear()
         httpHeaders.add("X-AUTH-TOKEN", "wrong_token")
-        responseEntity = testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
-        assertThat(responseEntity.body).isNotEqualTo(null)
-
-        responseValue = responseEntity.body!!
-        assertThat(responseValue.errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
+        stringResponse = testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
+        assertThat(stringResponse.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }
 
     @Test
@@ -341,29 +334,25 @@ class ClientApiControllerTest {
         // Request[Failure: Wrong Token]
         httpHeaders.clear()
         httpHeaders.add("X-AUTH-TOKEN", "testingToken")
-        responseEntity =
+        var stringEntity: ResponseEntity<String> =
             testRestTemplate.exchange(
                 restartUrl,
                 HttpMethod.POST,
                 HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders),
-                UserRestartResponseDto::class
+                String::class
             )
-        assertThat(responseEntity.body).isNotEqualTo(null)
-        responseValue = responseEntity.body!!
-        assertThat(responseValue.errorMessage).isEqualTo("Cannot find user with token!")
+        assertThat(stringEntity.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
 
         // Request[Failure: Without token]
         httpHeaders.clear()
-        responseEntity =
+        stringEntity =
             testRestTemplate.exchange(
                 restartUrl,
                 HttpMethod.POST,
                 HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders),
-                UserRestartResponseDto::class
+                String::class
             )
-        assertThat(responseEntity.body).isNotEqualTo(null)
-        responseValue = responseEntity.body!!
-        assertThat(responseValue.errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
+        assertThat(stringEntity.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }
 
     @Test
@@ -379,31 +368,27 @@ class ClientApiControllerTest {
         val entity: HttpEntity<String> = HttpEntity<String>(headers)
 
         // Request[Successful one]
-        var responseEntity: ResponseEntity<Array<UserImageListResponseDto>> =
+        val responseEntity: ResponseEntity<Array<UserImageListResponseDto>> =
             testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
 
-        var responseValue: Array<UserImageListResponseDto> = responseEntity.body!!
+        val responseValue: Array<UserImageListResponseDto> = responseEntity.body!!
         assertThat(responseValue.size).isEqualTo(0)
 
         // Request[Failure: Wrong Token]
+        headers.clear()
         headers.set("X-AUTH-TOKEN", "a")
-        responseEntity =
-            testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
-        assertThat(responseEntity.body).isNotEqualTo(null)
+        var responseString: ResponseEntity<String> =
+            testRestTemplate.exchange(finalUrl, HttpMethod.GET, HttpEntity<Void>(headers), String::class)
+        assertThat(responseString.body).isNotEqualTo(null)
+        assertThat(responseString.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
 
-        responseValue = responseEntity.body!!
-        assertThat(responseValue.size).isEqualTo(1)
-        assertThat(responseValue[0].errorMessage).isNotEqualTo("")
 
         // Request[Failure: No Token]
         headers.clear()
-        responseEntity =
-            testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity, Array<UserImageListResponseDto>::class)
-        assertThat(responseEntity.body).isNotEqualTo(null)
-
-        responseValue = responseEntity.body!!
-        assertThat(responseValue.size).isEqualTo(1)
-        assertThat(responseValue[0].errorMessage).isEqualTo("Token is Invalid. Please Re-Login")
+        responseString =
+            testRestTemplate.exchange(finalUrl, HttpMethod.GET, HttpEntity<Void>(headers), String::class)
+        assertThat(responseString.body).isNotEqualTo(null)
+        assertThat(responseString.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }
 }

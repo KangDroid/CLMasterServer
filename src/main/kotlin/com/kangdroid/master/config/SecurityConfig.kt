@@ -31,7 +31,12 @@ class SecurityConfig(private val jwtTokenProvider: JWTTokenProvider) : WebSecuri
             .headers().frameOptions().disable()
             .and()
             .authorizeRequests()
-            .antMatchers("/api/client/node").hasRole("USER")
+            .antMatchers(
+                "/api/client/node",
+                "/api/client/container",
+                "/api/client/restart",
+                "/api/admin/node/register"
+            ).hasRole("USER")
             .antMatchers("/**").permitAll()
             .and()
             .addFilterBefore(JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter::class.java)
