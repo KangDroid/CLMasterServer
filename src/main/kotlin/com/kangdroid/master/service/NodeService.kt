@@ -10,6 +10,7 @@ import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.error.ErrorResponse
+import com.kangdroid.master.error.Response
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -52,7 +53,7 @@ class NodeService {
      * returns: UserImageResponseDto - Containing Full information about container
      * returns: UserImageResponseDto - Containing Error Message.
      */
-    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): ResponseEntity<*> {
+    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): ResponseEntity<Response> {
         // Find Compute Node information given DTO - to register image on that container.
         val node: Node = nodeRepository.findByRegionName(userImageSaveRequestDto.computeRegion) ?: run {
             return ResponseEntity

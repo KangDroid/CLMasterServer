@@ -16,6 +16,7 @@ import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.error.ErrorResponse
+import com.kangdroid.master.error.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
@@ -236,7 +237,7 @@ class NodeServiceTest {
         )
 
         // do work[Successful one]
-        var userImageResponseEntity: ResponseEntity<*> = nodeService.createContainer(userImageSaveRequestDto)
+        var userImageResponseEntity: ResponseEntity<Response> = nodeService.createContainer(userImageSaveRequestDto)
         assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(userImageResponseEntity.body).isNotEqualTo(null)
 
