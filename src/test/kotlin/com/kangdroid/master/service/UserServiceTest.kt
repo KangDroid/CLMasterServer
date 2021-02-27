@@ -278,7 +278,7 @@ class UserServiceTest {
         )
 
         // do work[Successful one]
-        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
 
         // userRestartRequestDto
         val userRestartRequestDto: UserRestartRequestDto = UserRestartRequestDto(

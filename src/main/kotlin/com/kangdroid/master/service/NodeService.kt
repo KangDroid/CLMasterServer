@@ -9,7 +9,9 @@ import com.kangdroid.master.data.node.dto.NodeAliveResponseDto
 import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
+import com.kangdroid.master.error.ErrorResponse
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
@@ -50,10 +52,12 @@ class NodeService {
      * returns: UserImageResponseDto - Containing Full information about container
      * returns: UserImageResponseDto - Containing Error Message.
      */
-    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): UserImageResponseDto {
+    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): ResponseEntity<*> {
         // Find Compute Node information given DTO - to register image on that container.
         val node: Node = nodeRepository.findByRegionName(userImageSaveRequestDto.computeRegion) ?: run {
-            return UserImageResponseDto(errorMessage = "Cannot find Compute Region!")
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse(HttpStatus.NOT_FOUND, "Cannot find Compute Region!"))
         }
 
         // Request compute-node to create a fresh container
@@ -62,7 +66,11 @@ class NodeService {
             restTemplate.postForEntity(url, UserImageResponseDto::class.java)
         }.onFailure {
             println(it.stackTraceToString())
-        }.getOrNull() ?: return UserImageResponseDto(errorMessage = "Cannot communicate with Compute node!")
+        }.getOrNull() ?: run {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot communicate with Compute node!"))
+        }
 
         val userImageResponseDto: UserImageResponseDto = responseEntity.body!!
         userImageResponseDto.regionLocation = userImageSaveRequestDto.computeRegion
@@ -71,10 +79,14 @@ class NodeService {
         val checkResponse: String = userService.saveWithCheck(userImageSaveRequestDto.userToken, userImageResponseDto)
 
         if (checkResponse != "") {
-            return UserImageResponseDto(errorMessage = checkResponse)
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, checkResponse))
         }
 
-        return userImageResponseDto
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userImageResponseDto)
     }
 
     /**

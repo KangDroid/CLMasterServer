@@ -10,6 +10,7 @@ import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -65,7 +66,10 @@ class ClientApiController {
      * returns: UserImageResponseDto with errorMessage.
      */
     @PostMapping("/api/client/container")
-    fun createContainer(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto, @RequestHeader httpHeaders: HttpHeaders): UserImageResponseDto {
+    fun createContainer(
+        @RequestBody userImageSaveRequestDto: UserImageSaveRequestDto,
+        @RequestHeader httpHeaders: HttpHeaders
+    ): ResponseEntity<*> {
         val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         userImageSaveRequestDto.userToken = tokenList[0]
 

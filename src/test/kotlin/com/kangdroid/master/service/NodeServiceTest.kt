@@ -15,6 +15,7 @@ import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.error.ErrorResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
@@ -23,7 +24,9 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.client.ExpectedCount.manyTimes
@@ -233,7 +236,11 @@ class NodeServiceTest {
         )
 
         // do work[Successful one]
-        var userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+        var userImageResponseEntity: ResponseEntity<*> = nodeService.createContainer(userImageSaveRequestDto)
+        assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(userImageResponseEntity.body).isNotEqualTo(null)
+
+        var userImageResponseDto: UserImageResponseDto = userImageResponseEntity.body as UserImageResponseDto
         assertThat(userImageResponseDto.errorMessage).isEqualTo("")
         assertThat(userImageResponseDto.containerId).isNotEqualTo("")
         assertThat(userImageResponseDto.targetIpAddress).isNotEqualTo("")
@@ -242,14 +249,15 @@ class NodeServiceTest {
 
         // do work[Failure: Wrong Compute Region]
         userImageSaveRequestDto.computeRegion = ""
-        userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
-        assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot find Compute Region!")
+        userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
+        assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        assertThat((userImageResponseEntity.body as ErrorResponse).errorMessage).isEqualTo("Cannot find Compute Region!")
         userImageSaveRequestDto.computeRegion = returnValue.regionName // restore region
 
         // do work[Failure: Wrong token somehow]
         userImageSaveRequestDto.userToken = ""
-        userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
-        assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
+        userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
+        assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         userImageSaveRequestDto.userToken = loginToken // restore token
 
         // setup mock
@@ -260,8 +268,10 @@ class NodeServiceTest {
             .andRespond(withServerError()) // Internal Error
 
         // do work[Failure: Compute Node Error]
-        userImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
-        assertThat(userImageResponseDto.errorMessage).isEqualTo("Cannot communicate with Compute node!")
+        userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
+        assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        assertThat((userImageResponseEntity.body as ErrorResponse).errorMessage).isEqualTo("Cannot communicate with Compute node!")
+
         mockServerFailing.verify()
         nodeService.restTemplate.requestFactory = originalRequestFactory // Restore working server
     }
@@ -288,7 +298,7 @@ class NodeServiceTest {
         )
 
         // Create Container
-        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto)
+        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
 
         // Find Docker Image Entity
         val userName: String? = userService.getUserName(loginToken)
