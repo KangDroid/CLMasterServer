@@ -26,13 +26,13 @@ class SecurityConfig(private val jwtTokenProvider: JWTTokenProvider) : WebSecuri
     }
 
     override fun configure(http: HttpSecurity) {
-        val addFilterBefore = http
+        http
             .csrf().disable()
             .headers().frameOptions().disable()
             .and()
             .authorizeRequests()
-            .antMatchers("/**").permitAll()
             .antMatchers("/api/client/node").hasRole("USER")
+            .antMatchers("/**").permitAll()
             .and()
             .addFilterBefore(JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter::class.java)
 

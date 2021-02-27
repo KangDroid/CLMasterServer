@@ -198,6 +198,9 @@ class ClientApiControllerTest {
 
     @Test
     fun isGettingNodeLoadWorking() {
+        // Login Token
+        val loginToken = registerDemoUser()
+
         // URL
         val urlFinal: String = "$baseUrl:$port/api/client/node"
         // save node first
@@ -212,8 +215,11 @@ class ClientApiControllerTest {
         var returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
 
         // Request
+        val httpHeaders: HttpHeaders = HttpHeaders().apply {
+            add("X-AUTH-TOKEN", loginToken)
+        }
         val responseInformation: ResponseEntity<Array<NodeInformationResponseDto>> =
-            testRestTemplate.getForEntity(urlFinal, Array<NodeInformationResponseDto>::class)
+            testRestTemplate.exchange(urlFinal, HttpMethod.GET, HttpEntity<Void>(httpHeaders), Array<NodeInformationResponseDto>::class)
         assertThat(responseInformation.body).isNotEqualTo(null) // Check for null
 
         // Get Response Value
