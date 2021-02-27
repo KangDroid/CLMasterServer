@@ -55,8 +55,7 @@ class ClientApiController {
      */
     @GetMapping("/api/client/container")
     fun getClientContainerList(@RequestHeader httpHeaders: HttpHeaders): List<UserImageListResponseDto> {
-        val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]
-            ?: return listOf<UserImageListResponseDto>(UserImageListResponseDto(errorMessage = "Token is Invalid. Please Re-Login"))
+        val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         return userService.listContainer(tokenList[0])
     }
 
@@ -67,8 +66,7 @@ class ClientApiController {
      */
     @PostMapping("/api/client/container")
     fun createContainer(@RequestBody userImageSaveRequestDto: UserImageSaveRequestDto, @RequestHeader httpHeaders: HttpHeaders): UserImageResponseDto {
-        val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]
-            ?: return UserImageResponseDto(errorMessage = "Token is Invalid. Please Re-Login")
+        val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         userImageSaveRequestDto.userToken = tokenList[0]
 
         return nodeService.createContainer(userImageSaveRequestDto)
@@ -79,8 +77,7 @@ class ClientApiController {
      */
     @PostMapping("/api/client/restart")
     fun restartContainerNode(@RequestBody userRestartRequestDto: UserRestartRequestDto, @RequestHeader httpHeaders: HttpHeaders): UserRestartResponseDto {
-        val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]
-            ?: return UserRestartResponseDto(errorMessage = "Token is Invalid. Please Re-Login")
+        val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         userRestartRequestDto.userToken = tokenList[0]
 
         return userService.restartContainer(userRestartRequestDto)
