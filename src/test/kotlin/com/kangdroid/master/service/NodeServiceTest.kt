@@ -242,7 +242,6 @@ class NodeServiceTest {
         assertThat(userImageResponseEntity.body).isNotEqualTo(null)
 
         var userImageResponseDto: UserImageResponseDto = userImageResponseEntity.body as UserImageResponseDto
-        assertThat(userImageResponseDto.errorMessage).isEqualTo("")
         assertThat(userImageResponseDto.containerId).isNotEqualTo("")
         assertThat(userImageResponseDto.targetIpAddress).isNotEqualTo("")
         assertThat(userImageResponseDto.targetPort).isNotEqualTo("")

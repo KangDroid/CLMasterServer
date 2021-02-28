@@ -15,6 +15,5 @@ class UserImageResponseDto(
     var targetIpAddress: String = "",
     var targetPort: String = "",
     var containerId: String = "",
-    var regionLocation: String = "",
-    var errorMessage: String = "",
+    var regionLocation: String = ""
 ): Response()

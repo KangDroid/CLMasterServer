@@ -265,7 +265,6 @@ class ClientApiControllerTest {
             testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
         assertThat(responseEntity.body).isNotEqualTo(null)
         var responseValue: UserImageResponseDto = responseEntity.body!!
-        assertThat((responseValue.errorMessage)).isEqualTo("")
         assertThat((responseValue.targetIpAddress)).isNotEqualTo("")
         assertThat((responseValue.targetPort)).isNotEqualTo("")
         assertThat((responseValue.containerId)).isNotEqualTo("")
