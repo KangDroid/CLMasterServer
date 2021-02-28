@@ -34,7 +34,7 @@ class ClientApiController {
     }
 
     @PostMapping("/api/client/login")
-    fun login(@RequestBody userLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {
+    fun login(@RequestBody userLoginRequestDto: UserLoginRequestDto): ResponseEntity<Response> {
         return userService.loginUser(userLoginRequestDto)
     }
 

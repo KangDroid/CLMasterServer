@@ -145,7 +145,7 @@ class ClientApiControllerTest {
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
             ),
-        )
+        ).body as UserLoginResponseDto
 
         return loginResponse.token
     }
@@ -185,6 +185,7 @@ class ClientApiControllerTest {
         )
         val responseEntity: ResponseEntity<UserLoginResponseDto> =
             testRestTemplate.postForEntity(finalUrl, userLoginRequestDto, UserLoginResponseDto::class)
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotEqualTo(null)
         assertThat(responseEntity.body!!.token).isNotEqualTo("")
     }

@@ -132,7 +132,7 @@ class UserServiceTest {
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
             ),
-        )
+        ).body as UserLoginResponseDto
 
         return loginResponse.token
     }
@@ -174,49 +174,55 @@ class UserServiceTest {
             userService.registerUser(userRegisterDto).body as UserRegisterResponseDto
 
         // Trying Login
-        var loginResponse: UserLoginResponseDto = userService.loginUser(
+        var loginResponseEntity: ResponseEntity<Response> = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
             )
         )
+        assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
 
+        var loginResponse: UserLoginResponseDto = loginResponseEntity.body as UserLoginResponseDto
         // Login Assert
         assertThat(loginResponse.errorMessage).isEqualTo("")
         assertThat(loginResponse.token).isNotEqualTo("")
 
         // Re-Login for making sure same token is returned.
         val curToken: String = loginResponse.token
-        loginResponse = userService.loginUser(
+        loginResponseEntity = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
             )
         )
+        assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
+        loginResponse = loginResponseEntity.body as UserLoginResponseDto
 
         // Login Assert
         assertThat(loginResponse.errorMessage).isEqualTo("")
         assertThat(loginResponse.token).isEqualTo(curToken)
 
         // Wrong Login - ID
-        loginResponse = userService.loginUser(
+        loginResponseEntity = userService.loginUser(
             UserLoginRequestDto(
                 userName = "ID_INCORRECT",
                 userPassword = userRegisterDto.userPassword
             )
         )
-        assertThat(loginResponse.errorMessage).isNotEqualTo("")
-        assertThat(loginResponse.token).isEqualTo("")
+        assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        var errorResponse: ErrorResponse = loginResponseEntity.body as ErrorResponse
+        assertThat(errorResponse.errorMessage).isNotEqualTo("")
 
         // Wrong Login - PW
-        loginResponse = userService.loginUser(
+        loginResponseEntity = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = "WrongPassword"
             )
         )
-        assertThat(loginResponse.errorMessage).isNotEqualTo("")
-        assertThat(loginResponse.token).isEqualTo("")
+        assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        errorResponse = loginResponseEntity.body as ErrorResponse
+        assertThat(errorResponse.errorMessage).isNotEqualTo("")
     }
 
     @Test

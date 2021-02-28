@@ -70,23 +70,26 @@ class UserService {
             .body(userRegisterResponseDto)
     }
 
-    fun loginUser(userLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {
+    fun loginUser(userLoginRequestDto: UserLoginRequestDto): ResponseEntity<Response> {
+        // UserLoginResponseDto
         val user: User = userRepository.findByUserName(userLoginRequestDto.userName)
-            ?: return UserLoginResponseDto(
-                errorMessage = "Cannot find user: ${userLoginRequestDto.userName}"
-            )
+            ?: return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse(HttpStatus.NOT_FOUND, "Cannot find user: ${userLoginRequestDto.userName}"))
 
         runCatching {
             require(passwordEncoder.isMatching(userLoginRequestDto.userPassword, user.password)) { "Wrong Password" }
         }.onFailure {
-            return UserLoginResponseDto(
-                errorMessage = "Password is incorrect!"
-            )
+            return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse(HttpStatus.FORBIDDEN, "Password is incorrect!"))
         }
 
-        return UserLoginResponseDto(
-            token = jwtTokenProvider.createToken(userLoginRequestDto.userName, user.roles.toList())
-        )
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(UserLoginResponseDto(
+                token = jwtTokenProvider.createToken(userLoginRequestDto.userName, user.roles.toList())
+            ))
     }
 
     /**

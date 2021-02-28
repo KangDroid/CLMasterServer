@@ -145,7 +145,7 @@ class NodeServiceTest {
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
             ),
-        )
+        ).body as UserLoginResponseDto
 
         return loginResponse.token
     }
