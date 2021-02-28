@@ -11,6 +11,8 @@ import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.error.ErrorResponse
+import com.kangdroid.master.error.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
@@ -18,7 +20,9 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.client.ClientHttpRequestFactory
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.client.ExpectedCount.manyTimes
@@ -119,7 +123,8 @@ class UserServiceTest {
             userName = "KangDroid",
             userPassword = "TestingPassword"
         )
-        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
+        val registerResponse: UserRegisterResponseDto =
+            userService.registerUser(userRegisterDto).body as UserRegisterResponseDto
 
         // Trying Login
         val loginResponse: UserLoginResponseDto = userService.loginUser(
@@ -138,17 +143,24 @@ class UserServiceTest {
             userName = "KangDroid",
             userPassword = "TestingPassword"
         )
-        var registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
+        var registerResponseEntity: ResponseEntity<Response> = userService.registerUser(userRegisterDto)
+        assertThat(registerResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(registerResponseEntity.body).isNotEqualTo(null)
+
+        var registerResponse: UserRegisterResponseDto =
+            registerResponseEntity.body as UserRegisterResponseDto
 
         // First, Correct[True] Test
-        assertThat(registerResponse.errorMessage).isEqualTo("")
         assertThat(registerResponse.registeredId).isEqualTo(userRegisterDto.userName)
 
         // Do work[Failure: Username Exists!]
-        registerResponse = userService.registerUser(userRegisterDto)
-        assertThat(registerResponse.errorMessage).isNotEqualTo("")
-        assertThat(registerResponse.errorMessage).isEqualTo("E-Mail address is already registered!")
-        assertThat(registerResponse.registeredId).isEqualTo("")
+        registerResponseEntity = userService.registerUser(userRegisterDto)
+        assertThat(registerResponseEntity.statusCode).isEqualTo(HttpStatus.CONFLICT)
+
+        val errorResponse: ErrorResponse = registerResponseEntity.body as ErrorResponse
+        assertThat(errorResponse.errorMessage).isNotEqualTo("")
+        assertThat(errorResponse.errorMessage).isEqualTo("E-Mail address is already registered!")
+        assertThat(errorResponse.httpStatus).isEqualTo(HttpStatus.CONFLICT)
     }
 
     @Test
@@ -158,10 +170,8 @@ class UserServiceTest {
             userName = "KangDroid",
             userPassword = "TestingPassword"
         )
-        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
-
-        // Check for ID Created well
-        assertThat(registerResponse.errorMessage).isEqualTo("")
+        val registerResponse: UserRegisterResponseDto =
+            userService.registerUser(userRegisterDto).body as UserRegisterResponseDto
 
         // Trying Login
         var loginResponse: UserLoginResponseDto = userService.loginUser(

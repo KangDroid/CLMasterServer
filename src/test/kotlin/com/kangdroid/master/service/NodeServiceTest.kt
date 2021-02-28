@@ -136,7 +136,8 @@ class NodeServiceTest {
             userName = "KangDroid",
             userPassword = "TestingPassword"
         )
-        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
+        val registerResponse: UserRegisterResponseDto =
+            userService.registerUser(userRegisterDto).body as UserRegisterResponseDto
 
         // Trying Login
         val loginResponse: UserLoginResponseDto = userService.loginUser(

@@ -5,9 +5,13 @@ import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.*
+import com.kangdroid.master.error.ErrorResponse
+import com.kangdroid.master.error.Response
 import com.kangdroid.master.security.JWTTokenProvider
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -37,7 +41,7 @@ class UserService {
         return userName
     }
 
-    fun registerUser(userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
+    fun registerUser(userRegisterDto: UserRegisterDto): ResponseEntity<Response> {
         lateinit var userRegisterResponseDto: UserRegisterResponseDto
         runCatching {
             userRepository.save(User(
@@ -48,17 +52,22 @@ class UserService {
         }.onSuccess {
             userRegisterResponseDto = UserRegisterResponseDto(
                 registeredId = it.userName,
-                errorMessage = ""
             )
         }.onFailure {
-            userRegisterResponseDto = if (it.cause is ConstraintViolationException) {
-                UserRegisterResponseDto(errorMessage = "E-Mail address is already registered!")
+            return if (it.cause is ConstraintViolationException) {
+                ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(ErrorResponse(HttpStatus.CONFLICT, "E-Mail address is already registered!"))
             } else {
-                UserRegisterResponseDto(errorMessage = "Unknown Throw: ${it.cause.toString()}")
+                ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown Throw: ${it.cause.toString()}"))
             }
         }
 
-        return userRegisterResponseDto
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(userRegisterResponseDto)
     }
 
     fun loginUser(userLoginRequestDto: UserLoginRequestDto): UserLoginResponseDto {

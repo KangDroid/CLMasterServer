@@ -11,6 +11,7 @@ import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.error.Response
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
 import org.assertj.core.api.Assertions.assertThat
@@ -136,7 +137,7 @@ class ClientApiControllerTest {
             userName = "KangDroid",
             userPassword = "TestingPassword"
         )
-        val registerResponse: UserRegisterResponseDto = userService.registerUser(userRegisterDto)
+        val responseEntity: ResponseEntity<Response> = userService.registerUser(userRegisterDto)
 
         // Trying Login
         val loginResponse: UserLoginResponseDto = userService.loginUser(
@@ -159,9 +160,12 @@ class ClientApiControllerTest {
         val responseEntity: ResponseEntity<UserRegisterResponseDto> =
             testRestTemplate.postForEntity(finalUrl, userRegisterDto, UserRegisterResponseDto::class)
 
+        println(responseEntity.statusCode)
+        println(responseEntity.body)
+
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotEqualTo(null)
-        assertThat(responseEntity.body!!.errorMessage).isEqualTo("")
-        assertThat(responseEntity.body!!.registeredId).isEqualTo(userRegisterDto.userName)
+        assertThat((responseEntity.body)!!.registeredId).isEqualTo(userRegisterDto.userName)
     }
 
     @Test

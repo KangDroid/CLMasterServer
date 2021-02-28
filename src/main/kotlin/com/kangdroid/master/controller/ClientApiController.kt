@@ -6,6 +6,8 @@ import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.error.ErrorResponse
+import com.kangdroid.master.error.Response
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,7 +29,7 @@ class ClientApiController {
 
     // Just for testing with postman
     @PostMapping("/api/client/register")
-    fun register(@RequestBody userRegisterDto: UserRegisterDto): UserRegisterResponseDto {
+    fun register(@RequestBody userRegisterDto: UserRegisterDto): ResponseEntity<Response> {
         return userService.registerUser(userRegisterDto)
     }
 
