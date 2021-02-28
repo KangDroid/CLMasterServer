@@ -16,4 +16,4 @@ class UserImageResponseDto(
     var targetPort: String = "",
     var containerId: String = "",
     var regionLocation: String = ""
-): Response()
+): Response

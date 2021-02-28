@@ -4,4 +4,4 @@ import com.kangdroid.master.error.Response
 
 class UserRegisterResponseDto(
     var registeredId: String = ""
-): Response()
+): Response
