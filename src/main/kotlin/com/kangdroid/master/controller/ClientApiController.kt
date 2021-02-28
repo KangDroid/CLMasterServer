@@ -43,7 +43,7 @@ class ClientApiController {
      * Returns: List of <NodeLoadResponseDto>[containing Load information]
      */
     @GetMapping("/api/client/node")
-    fun getNodeInformation(): List<NodeInformationResponseDto> {
+    fun getNodeInformation(): ResponseEntity<List<NodeInformationResponseDto>> {
         return nodeService.getNodeInformation()
     }
 

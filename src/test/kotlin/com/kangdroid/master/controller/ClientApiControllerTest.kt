@@ -225,6 +225,7 @@ class ClientApiControllerTest {
         }
         val responseInformation: ResponseEntity<Array<NodeInformationResponseDto>> =
             testRestTemplate.exchange(urlFinal, HttpMethod.GET, HttpEntity<Void>(httpHeaders), Array<NodeInformationResponseDto>::class)
+        assertThat(responseInformation.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseInformation.body).isNotEqualTo(null) // Check for null
 
         // Get Response Value

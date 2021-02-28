@@ -124,10 +124,13 @@ class NodeService {
      * getNodeLoad(): Get All of load information, in registered node on master's db.
      * returns: List of <NodeLoadResponseDto>[Containing Region, Load Info]
      */
-    fun getNodeInformation(): List<NodeInformationResponseDto> {
-        return nodeRepository.findAll().stream()
-            .map { NodeInformationResponseDto(it, restTemplate) }
-            .collect(Collectors.toList())
+    fun getNodeInformation(): ResponseEntity<List<NodeInformationResponseDto>> {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(nodeRepository.findAll().stream()
+                .map { NodeInformationResponseDto(it, restTemplate) }
+                .collect(Collectors.toList())
+            )
     }
 
     /**

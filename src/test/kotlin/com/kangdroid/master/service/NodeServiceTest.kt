@@ -162,7 +162,12 @@ class NodeServiceTest {
         val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
 
         // Assert
-        val list: List<NodeInformationResponseDto> = nodeService.getNodeInformation()
+        val responseEntity: ResponseEntity<List<NodeInformationResponseDto>> =
+            nodeService.getNodeInformation()
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        val list: List<NodeInformationResponseDto> = responseEntity.body!!
         assertThat(list.size).isEqualTo(1)
         assertThat(list[0].nodeLoadPercentage).isNotEmpty
         assertThat(list[0].regionName).isNotEmpty
