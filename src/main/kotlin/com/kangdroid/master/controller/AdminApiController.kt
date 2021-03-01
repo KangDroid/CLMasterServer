@@ -4,6 +4,7 @@ import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.service.NodeService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -21,7 +22,7 @@ class AdminApiController {
      * returns: A NodeSaveResponseDto, containing errorMessage.
      */
     @PostMapping("/api/admin/node/register")
-    fun registerNode(@RequestBody nodeSaveRequestDto: NodeSaveRequestDto): NodeSaveResponseDto {
+    fun registerNode(@RequestBody nodeSaveRequestDto: NodeSaveRequestDto): ResponseEntity<NodeSaveResponseDto> {
         return nodeService.save(nodeSaveRequestDto)
     }
 }

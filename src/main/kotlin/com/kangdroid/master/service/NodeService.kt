@@ -11,6 +11,7 @@ import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
+import com.kangdroid.master.error.exception.ConflictException
 import com.kangdroid.master.error.exception.NotFoundException
 import com.kangdroid.master.error.exception.UnknownErrorException
 import org.springframework.beans.factory.annotation.Autowired
@@ -137,7 +138,7 @@ class NodeService {
      * returns: A NodeSaveResponseDto, containing Node Information
      * returns: A NodeSaveResponseDto, containing errorMessage.
      */
-    fun save(nodeSaveRequestDto: NodeSaveRequestDto): NodeSaveResponseDto {
+    fun save(nodeSaveRequestDto: NodeSaveRequestDto): ResponseEntity<NodeSaveResponseDto> {
         // Convert DTO to Entity
         val node: Node = nodeSaveRequestDto.toEntity()
 
@@ -147,16 +148,18 @@ class NodeService {
         // Find Any duplicated registered node. - if duplicated node found, return "Error"
         val nodeGot: Node = nodeRepository.findByIpAddress(node.ipAddress) ?: Node(id = Long.MAX_VALUE, "", "", "", "")
         if (nodeGot.id != Long.MAX_VALUE) {
-            return NodeSaveResponseDto(errorMessage = "Duplicated Compute Node is found on IP Address: ${node.ipAddress}")
+            throw ConflictException("Duplicated Compute Node is found on IP Address: ${node.ipAddress}")
         }
 
         // Check for node integrity
         val result: Cause = isNodeRunning(nodeSaveRequestDto)
 
         return if (result.cause.isNotEmpty() || result.value) {
-            NodeSaveResponseDto(errorMessage = result.cause)
+            throw UnknownErrorException(result.cause)
         } else {
-            NodeSaveResponseDto(nodeRepository.save(node))
+            ResponseEntity
+                .status(HttpStatus.OK)
+                .body(NodeSaveResponseDto(nodeRepository.save(node)))
         }
     }
 

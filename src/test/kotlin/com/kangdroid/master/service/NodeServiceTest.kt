@@ -159,7 +159,7 @@ class NodeServiceTest {
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
         )
-        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        nodeService.save(nodeSaveRequestDto)
 
         // Assert
         val responseEntity: ResponseEntity<List<NodeInformationResponseDto>> =
@@ -184,15 +184,24 @@ class NodeServiceTest {
         )
 
         // do work
-        var returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        var returnEntity: ResponseEntity<NodeSaveResponseDto> = nodeService.save(nodeSaveRequestDto)
+        assertThat(returnEntity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(returnEntity.body).isNotEqualTo(null)
+
+        var returnValue: NodeSaveResponseDto = returnEntity.body!!
 
         // Assert
         assertThat(returnValue.regionName.length).isGreaterThan(0)
         assertThat(returnValue.regionName).isEqualTo("Region-${nodeRepository.count() - 1}")
 
         // Duplication Test
-        returnValue = nodeService.save(nodeSaveRequestDto)
-        assertThat(returnValue.errorMessage).isNotEqualTo("")
+        runCatching {
+            returnEntity = nodeService.save(nodeSaveRequestDto)
+        }.onSuccess {
+            fail("Should raise duplicated - related exception, but somehow it succeed!")
+        }.onFailure {
+            assertThat(it.message).contains("Duplicated Compute Node is found on IP Address")
+        }
 
         // Wrong IP Address[False]
         val originalRequestFactory: ClientHttpRequestFactory = nodeService.restTemplate.requestFactory
@@ -200,15 +209,21 @@ class NodeServiceTest {
         mockServerFailing.expect(requestTo("http://whatever:9090/api/alive"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withServerError()) // Internal Error
-        returnValue = nodeService.save(
-            NodeSaveRequestDto(
-                id = 10,
-                hostName = "",
-                hostPort = "9090",
-                ipAddress = "whatever"
+
+        runCatching {
+            returnEntity = nodeService.save(
+                NodeSaveRequestDto(
+                    id = 10,
+                    hostName = "",
+                    hostPort = "9090",
+                    ipAddress = "whatever"
+                )
             )
-        )
-        assertThat(returnValue.errorMessage).isNotEqualTo("")
+        }.onSuccess {
+            fail("We have mocked our server to force-fail. But somehow it succeed.")
+        }.onFailure {
+            assertThat(it.message).isNotEqualTo("No Message")
+        }
         nodeService.restTemplate.requestFactory = originalRequestFactory // restore working template
     }
 
@@ -234,7 +249,7 @@ class NodeServiceTest {
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
         )
-        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto).body!!
 
         // Now on
         val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(
@@ -306,7 +321,7 @@ class NodeServiceTest {
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
         )
-        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto).body!!
 
         // Now on
         val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(

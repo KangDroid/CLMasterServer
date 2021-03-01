@@ -304,7 +304,7 @@ class UserServiceTest {
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
         )
-        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto).body!!
 
         // Now on
         val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(

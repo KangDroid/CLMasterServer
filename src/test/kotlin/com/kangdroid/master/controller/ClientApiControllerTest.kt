@@ -254,7 +254,7 @@ class ClientApiControllerTest {
         )
 
         // Save node
-        var returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        var returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto).body!!
 
         // Request
         val httpHeaders: HttpHeaders = HttpHeaders().apply {
@@ -299,7 +299,7 @@ class ClientApiControllerTest {
         )
 
         // Save node
-        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto).body!!
 
         // Request Dto
         val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(
@@ -361,7 +361,7 @@ class ClientApiControllerTest {
         )
 
         // Save node
-        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto)
+        val returnValue: NodeSaveResponseDto = nodeService.save(nodeSaveRequestDto).body!!
 
         // Request Dto
         val userImageSaveRequestDto: UserImageSaveRequestDto = UserImageSaveRequestDto(
