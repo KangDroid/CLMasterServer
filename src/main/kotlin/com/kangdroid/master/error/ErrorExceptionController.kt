@@ -1,6 +1,6 @@
 package com.kangdroid.master.error
 
-import com.kangdroid.master.error.exception.EmailConflictException
+import com.kangdroid.master.error.exception.ConflictException
 import com.kangdroid.master.error.exception.UnknownErrorException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 
 @ControllerAdvice
 class ErrorExceptionController {
-    @ExceptionHandler(EmailConflictException::class)
-    fun handleEmailConflict(emailConflictException: EmailConflictException) : ResponseEntity<ErrorResponse> {
+    @ExceptionHandler(ConflictException::class)
+    fun handleConflict(conflictException: ConflictException) : ResponseEntity<ErrorResponse> {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
             .body(
                 ErrorResponse(
                     HttpStatus.CONFLICT,
-                    emailConflictException.message ?: "No Message"
+                    conflictException.message ?: "No Message"
                 )
             )
     }

@@ -5,7 +5,7 @@ import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.*
-import com.kangdroid.master.error.exception.EmailConflictException
+import com.kangdroid.master.error.exception.ConflictException
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
 import com.kangdroid.master.error.exception.UnknownErrorException
@@ -59,7 +59,7 @@ class UserService {
             )
         }.onFailure {
             if (it.cause is ConstraintViolationException) {
-                throw EmailConflictException("E-Mail address is already registered!")
+                throw ConflictException("E-Mail address is already registered!")
             } else {
                 throw UnknownErrorException("Unknown Throw: ${it.cause.toString()}")
             }
