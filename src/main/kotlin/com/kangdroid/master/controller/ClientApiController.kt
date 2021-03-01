@@ -81,7 +81,7 @@ class ClientApiController {
     fun restartContainerNode(
         @RequestBody userRestartRequestDto: UserRestartRequestDto,
         @RequestHeader httpHeaders: HttpHeaders
-    ): UserRestartResponseDto {
+    ): ResponseEntity<Void> {
         val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         userRestartRequestDto.userToken = tokenList[0]
 

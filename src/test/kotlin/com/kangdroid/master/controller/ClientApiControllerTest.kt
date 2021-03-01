@@ -383,16 +383,13 @@ class ClientApiControllerTest {
         // Request
         val httpHeaders: HttpHeaders = HttpHeaders()
         httpHeaders.add("X-AUTH-TOKEN", loginToken)
-        var responseEntity: ResponseEntity<UserRestartResponseDto> =
+        var responseEntity: ResponseEntity<Void> =
             testRestTemplate.exchange(
                 restartUrl,
                 HttpMethod.POST,
-                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders),
-                UserRestartResponseDto::class
+                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders)
             )
-        assertThat(responseEntity.body).isNotEqualTo(null)
-        var responseValue: UserRestartResponseDto = responseEntity.body!!
-        assertThat(responseValue.errorMessage).isEqualTo("")
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
 
         // Request[Failure: Wrong Token]
         httpHeaders.clear()
@@ -401,8 +398,7 @@ class ClientApiControllerTest {
             testRestTemplate.exchange(
                 restartUrl,
                 HttpMethod.POST,
-                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders),
-                String::class
+                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders)
             )
         assertThat(stringEntity.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
 
@@ -412,8 +408,7 @@ class ClientApiControllerTest {
             testRestTemplate.exchange(
                 restartUrl,
                 HttpMethod.POST,
-                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders),
-                String::class
+                HttpEntity<UserRestartRequestDto>(userRestartRequestDto, httpHeaders)
             )
         assertThat(stringEntity.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }

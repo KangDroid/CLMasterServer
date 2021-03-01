@@ -323,19 +323,29 @@ class UserServiceTest {
         )
 
         // Do work
-        var userRestartResponseDto: UserRestartResponseDto = userService.restartContainer(userRestartRequestDto)
-        assertThat(userRestartResponseDto.errorMessage).isEqualTo("")
+        var userRestartEntity: ResponseEntity<Void> = userService.restartContainer(userRestartRequestDto)
+        assertThat(userRestartEntity.statusCode).isEqualTo(HttpStatus.OK)
 
         // Do work[Failure: Wrong Token]
         userRestartRequestDto.userToken = ""
-        userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
-        assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot find user with token!")
+        runCatching {
+            userRestartEntity = userService.restartContainer(userRestartRequestDto)
+        }.onSuccess {
+            fail("Token is null, but it succeed somehow. Aborting!")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Cannot find user with token!")
+        }
         userRestartRequestDto.userToken = loginToken // restore token
 
         // Do work[Failure: Wrong ID]
         userRestartRequestDto.containerId = ""
-        userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
-        assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot find container ID!")
+        runCatching {
+            userRestartEntity = userService.restartContainer(userRestartRequestDto)
+        }.onSuccess {
+            fail("Container ID is null, but it responded with - restart was succeed.")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Cannot find container ID!")
+        }
         userRestartRequestDto.containerId = userImageResponseDto.containerId // Restore Container ID
 
         // Do work[Failure: Internal Node Server Error]
@@ -344,9 +354,13 @@ class UserServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo("http://${testConfiguration.computeNodeServerHostName}:${testConfiguration.computeNodeServerPort}/api/node/restart"))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withServerError()) // Internal Error
-        userRestartResponseDto = userService.restartContainer(userRestartRequestDto)
-        assertThat(userRestartResponseDto.errorMessage).isNotEqualTo("")
-        assertThat(userRestartResponseDto.errorMessage).isEqualTo("Cannot communicate with Compute node!")
+        runCatching {
+            userRestartEntity = userService.restartContainer(userRestartRequestDto)
+        }.onSuccess {
+            fail("Internal Node Error is expected, but it restarted node without node server somehow")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Cannot communicate with Compute node!")
+        }
         nodeService.restTemplate.requestFactory =
             originalRequestFactory // Restore requestFactory on nodeServer's restTemplate
     }

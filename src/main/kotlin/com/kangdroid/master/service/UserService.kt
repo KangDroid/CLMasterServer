@@ -144,21 +144,23 @@ class UserService {
     /**
      * RestartContainer(): Restart Corresponding Container
      */
-    fun restartContainer(userRestartRequestDto: UserRestartRequestDto): UserRestartResponseDto {
+    fun restartContainer(userRestartRequestDto: UserRestartRequestDto): ResponseEntity<Void> {
         val userName: String = getUserName(userRestartRequestDto.userToken)
-            ?: return UserRestartResponseDto(errorMessage = "Cannot find user with token!")
+            ?: throw NotFoundException("Cannot find user with token!")
         val user: User = userRepository.findByUserName(userName)
-            ?: return UserRestartResponseDto(errorMessage = "Cannot find user with token!")
+            ?: throw NotFoundException("Cannot find user with token!")
         val dockerImageList: MutableList<DockerImage> = user.dockerImage
         val targetDockerImage: DockerImage = dockerImageList.find {
             it.dockerId == userRestartRequestDto.containerId
-        } ?: return UserRestartResponseDto(errorMessage = "Cannot find container ID!")
+        } ?: throw NotFoundException("Cannot find container ID!")
 
         val errorMessage: String = nodeService.restartContainer(targetDockerImage)
         if (errorMessage.isNotEmpty()) {
-            return UserRestartResponseDto(errorMessage = errorMessage)
+            throw UnknownErrorException(errorMessage)
         }
 
-        return UserRestartResponseDto()
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(null)
     }
 }
