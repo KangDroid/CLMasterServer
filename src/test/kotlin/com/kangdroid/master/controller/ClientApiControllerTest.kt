@@ -176,7 +176,11 @@ class ClientApiControllerTest {
             userName = "testUser",
             userPassword = "testPassword"
         )
-        testRestTemplate.postForEntity<UserRegisterResponseDto>(registerUrl, userRegisterDto, UserRegisterResponseDto::class)
+        testRestTemplate.postForEntity<UserRegisterResponseDto>(
+            registerUrl,
+            userRegisterDto,
+            UserRegisterResponseDto::class
+        )
 
         val finalUrl: String = "$baseUrl:$port/api/client/login"
         val userLoginRequestDto: UserLoginRequestDto = UserLoginRequestDto(
@@ -224,7 +228,12 @@ class ClientApiControllerTest {
             add("X-AUTH-TOKEN", loginToken)
         }
         val responseInformation: ResponseEntity<Array<NodeInformationResponseDto>> =
-            testRestTemplate.exchange(urlFinal, HttpMethod.GET, HttpEntity<Void>(httpHeaders), Array<NodeInformationResponseDto>::class)
+            testRestTemplate.exchange(
+                urlFinal,
+                HttpMethod.GET,
+                HttpEntity<Void>(httpHeaders),
+                Array<NodeInformationResponseDto>::class
+            )
         assertThat(responseInformation.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseInformation.body).isNotEqualTo(null) // Check for null
 
@@ -268,7 +277,12 @@ class ClientApiControllerTest {
 
         // do work[Successful Operation]
         var responseEntity: ResponseEntity<UserImageResponseDto> =
-            testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
+            testRestTemplate.exchange(
+                urlFinal,
+                HttpMethod.POST,
+                HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders),
+                UserImageResponseDto::class
+            )
         assertThat(responseEntity.body).isNotEqualTo(null)
         var responseValue: UserImageResponseDto = responseEntity.body!!
         assertThat((responseValue.targetIpAddress)).isNotEqualTo("")
@@ -278,13 +292,23 @@ class ClientApiControllerTest {
 
         // do work[Failure: Wrong Token]
         userImageSaveRequestDto.userToken = ""
-        var stringResponse: ResponseEntity<String> = testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, null), String::class)
+        var stringResponse: ResponseEntity<String> = testRestTemplate.exchange(
+            urlFinal,
+            HttpMethod.POST,
+            HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, null),
+            String::class
+        )
         assertThat(stringResponse.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
 
         // do work[Failure: No Token]
         httpHeaders.clear()
         httpHeaders.add("X-AUTH-TOKEN", "wrong_token")
-        stringResponse = testRestTemplate.exchange(urlFinal, HttpMethod.POST, HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders), UserImageResponseDto::class)
+        stringResponse = testRestTemplate.exchange(
+            urlFinal,
+            HttpMethod.POST,
+            HttpEntity<UserImageSaveRequestDto>(userImageSaveRequestDto, httpHeaders),
+            UserImageResponseDto::class
+        )
         assertThat(stringResponse.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }
 
@@ -314,7 +338,8 @@ class ClientApiControllerTest {
         )
 
         // Create Container
-        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
+        val userImageResponseDto: UserImageResponseDto =
+            nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
 
         // Restart Request Dto
         val userRestartRequestDto: UserRestartRequestDto = UserRestartRequestDto(

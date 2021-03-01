@@ -44,11 +44,13 @@ class UserService {
     fun registerUser(userRegisterDto: UserRegisterDto): ResponseEntity<Response> {
         lateinit var userRegisterResponseDto: UserRegisterResponseDto
         runCatching {
-            userRepository.save(User(
-                userName = userRegisterDto.userName,
-                userPassword = passwordEncoder.encodePlainText(userRegisterDto.userPassword),
-                roles = setOf("ROLE_USER")
-            ))
+            userRepository.save(
+                User(
+                    userName = userRegisterDto.userName,
+                    userPassword = passwordEncoder.encodePlainText(userRegisterDto.userPassword),
+                    roles = setOf("ROLE_USER")
+                )
+            )
         }.onSuccess {
             userRegisterResponseDto = UserRegisterResponseDto(
                 registeredId = it.userName,
@@ -87,9 +89,11 @@ class UserService {
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(UserLoginResponseDto(
-                token = jwtTokenProvider.createToken(userLoginRequestDto.userName, user.roles.toList())
-            ))
+            .body(
+                UserLoginResponseDto(
+                    token = jwtTokenProvider.createToken(userLoginRequestDto.userName, user.roles.toList())
+                )
+            )
     }
 
     /**

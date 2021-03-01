@@ -63,15 +63,16 @@ class NodeService {
 
         // Request compute-node to create a fresh container
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
-        val responseEntity: ResponseEntity<UserImageResponseDto> = kotlin.runCatching<ResponseEntity<UserImageResponseDto>> {
-            restTemplate.postForEntity(url, UserImageResponseDto::class.java)
-        }.onFailure {
-            println(it.stackTraceToString())
-        }.getOrNull() ?: run {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot communicate with Compute node!"))
-        }
+        val responseEntity: ResponseEntity<UserImageResponseDto> =
+            kotlin.runCatching<ResponseEntity<UserImageResponseDto>> {
+                restTemplate.postForEntity(url, UserImageResponseDto::class.java)
+            }.onFailure {
+                println(it.stackTraceToString())
+            }.getOrNull() ?: run {
+                return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot communicate with Compute node!"))
+            }
 
         val userImageResponseDto: UserImageResponseDto = responseEntity.body!!
         userImageResponseDto.regionLocation = userImageSaveRequestDto.computeRegion
@@ -172,11 +173,14 @@ class NodeService {
      */
     private fun isNodeRunning(nodeSaveRequestDto: NodeSaveRequestDto): Cause {
         val url: String = "http://${nodeSaveRequestDto.ipAddress}:${nodeSaveRequestDto.hostPort}/api/alive"
-        val responseEntity: ResponseEntity<NodeAliveResponseDto> = runCatching{
+        val responseEntity: ResponseEntity<NodeAliveResponseDto> = runCatching {
             restTemplate.getForEntity(url, NodeAliveResponseDto::class.java)
         }.onFailure {
             println(it.stackTraceToString())
-        }.getOrNull() ?: return Cause(value = false, cause = "Connecting to Node Server failed. Check for IP/Port again.")
+        }.getOrNull() ?: return Cause(
+            value = false,
+            cause = "Connecting to Node Server failed. Check for IP/Port again."
+        )
 
         val response: NodeAliveResponseDto = responseEntity.body!!
 

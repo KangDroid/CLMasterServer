@@ -1,12 +1,12 @@
 package com.kangdroid.master.controller
 
-import com.kangdroid.master.data.docker.dto.*
+import com.kangdroid.master.data.docker.dto.UserImageListResponseDto
+import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
+import com.kangdroid.master.data.docker.dto.UserRestartRequestDto
+import com.kangdroid.master.data.docker.dto.UserRestartResponseDto
 import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
-import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
-import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
-import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
@@ -14,9 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
-import javax.servlet.http.HttpServletRequest
 
 @RestController
 class ClientApiController {
@@ -82,7 +79,10 @@ class ClientApiController {
      * restartContainerNode(): Restart User's Container
      */
     @PostMapping("/api/client/restart")
-    fun restartContainerNode(@RequestBody userRestartRequestDto: UserRestartRequestDto, @RequestHeader httpHeaders: HttpHeaders): UserRestartResponseDto {
+    fun restartContainerNode(
+        @RequestBody userRestartRequestDto: UserRestartRequestDto,
+        @RequestHeader httpHeaders: HttpHeaders
+    ): UserRestartResponseDto {
         val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         userRestartRequestDto.userToken = tokenList[0]
 

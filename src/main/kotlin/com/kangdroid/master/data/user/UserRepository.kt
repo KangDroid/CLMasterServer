@@ -2,7 +2,6 @@ package com.kangdroid.master.data.user
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 /**
  * It is just DAO for Entity "User", Might contains User Data.

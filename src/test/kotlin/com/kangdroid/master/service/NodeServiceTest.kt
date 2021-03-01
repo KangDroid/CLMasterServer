@@ -2,7 +2,6 @@ package com.kangdroid.master.service
 
 import com.kangdroid.master.config.TestConfiguration
 import com.kangdroid.master.data.docker.DockerImage
-import com.kangdroid.master.data.docker.DockerImageRepository
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.NodeRepository
@@ -304,7 +303,8 @@ class NodeServiceTest {
         )
 
         // Create Container
-        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
+        val userImageResponseDto: UserImageResponseDto =
+            nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
 
         // Find Docker Image Entity
         val userName: String? = userService.getUserName(loginToken)

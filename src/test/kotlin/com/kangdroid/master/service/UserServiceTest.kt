@@ -241,7 +241,7 @@ class UserServiceTest {
         assertThat(responseList[0].errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
 
         // With Some dummy image
-        val userName:String? = userService.getUserName(loginToken)
+        val userName: String? = userService.getUserName(loginToken)
         assertThat(userName).isNotEqualTo(null) // userName should not be equal
         val user: User? = userRepository.findByUserName(userName!!)
         assertThat(user).isNotEqualTo(null)
@@ -294,7 +294,8 @@ class UserServiceTest {
         )
 
         // do work[Successful one]
-        val userImageResponseDto: UserImageResponseDto = nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
+        val userImageResponseDto: UserImageResponseDto =
+            nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
 
         // userRestartRequestDto
         val userRestartRequestDto: UserRestartRequestDto = UserRestartRequestDto(

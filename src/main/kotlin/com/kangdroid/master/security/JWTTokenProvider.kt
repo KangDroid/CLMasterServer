@@ -15,7 +15,8 @@ import javax.servlet.http.HttpServletRequest
 @Component
 class JWTTokenProvider(private val userDetailsService: UserDetailsService) {
     // TODO: Make it privately configured
-    private val testInnerPassword: String = Base64.getEncoder().encodeToString("alsdfj;alsdfjkldsajlksajdflasdjl;fjasldkfjlsadfas;dfjlasdjfsl;adfj;ldsjfklsajdfljs".toByteArray())
+    private val testInnerPassword: String = Base64.getEncoder()
+        .encodeToString("alsdfj;alsdfjkldsajlksajdflasdjl;fjasldkfjlsadfas;dfjlasdjfsl;adfj;ldsjfklsajdfljs".toByteArray())
 
     // Expiration Time
     private val expirationPeriod: Long = 5 * 60 * 1000L
@@ -44,7 +45,7 @@ class JWTTokenProvider(private val userDetailsService: UserDetailsService) {
     }
 
     fun getUserPk(token: String): String {
-        return Jwts.parser().setSigningKey(testInnerPassword).parseClaimsJws(token).getBody().subject
+        return Jwts.parser().setSigningKey(testInnerPassword).parseClaimsJws(token).body.subject
     }
 
     fun resolveToken(request: HttpServletRequest): String? {

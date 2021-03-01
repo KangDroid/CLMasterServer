@@ -7,7 +7,6 @@ import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
-import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.error.Response
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.exchange
-import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.*
 import org.springframework.http.client.ClientHttpRequestFactory
@@ -114,7 +112,12 @@ class AdminApiControllerTest {
             add("X-AUTH-TOKEN", loginToken)
         }
         val responseEntity: ResponseEntity<String> =
-            testRestTemplate.exchange(url, HttpMethod.POST, HttpEntity<NodeSaveRequestDto>(nodeSaveRequestDto, httpHeaders), NodeSaveRequestDto::class)
+            testRestTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                HttpEntity<NodeSaveRequestDto>(nodeSaveRequestDto, httpHeaders),
+                NodeSaveRequestDto::class
+            )
         val returnValue: String = responseEntity.body ?: "Error"
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
 
