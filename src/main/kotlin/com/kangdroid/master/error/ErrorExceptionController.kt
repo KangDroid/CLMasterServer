@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 
 @ControllerAdvice
 class ErrorExceptionController {
-    private val no_message: String = "No Message"
     @ExceptionHandler(ConflictException::class)
     fun handleConflict(conflictException: ConflictException) : ResponseEntity<ErrorResponse> {
         return ResponseEntity
@@ -19,7 +18,7 @@ class ErrorExceptionController {
             .body(
                 ErrorResponse(
                     HttpStatus.CONFLICT,
-                    conflictException.message ?: no_message
+                    conflictException.message!!
                 )
             )
     }
@@ -31,7 +30,7 @@ class ErrorExceptionController {
             .body(
                 ErrorResponse(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    unknownErrorException.message ?: no_message
+                    unknownErrorException.message!!
                 )
             )
     }
@@ -43,7 +42,7 @@ class ErrorExceptionController {
             .body(
                 ErrorResponse(
                     HttpStatus.FORBIDDEN,
-                    forbiddenException.message ?: no_message
+                    forbiddenException.message!!
                 )
             )
     }
@@ -55,7 +54,7 @@ class ErrorExceptionController {
             .body(
                 ErrorResponse(
                     HttpStatus.NOT_FOUND,
-                    notFoundException.message ?: no_message
+                    notFoundException.message!!
                 )
             )
     }
