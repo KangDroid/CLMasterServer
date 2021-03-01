@@ -124,4 +124,29 @@ class AdminApiControllerTest {
         // Reset
         nodeService.restTemplate.requestFactory = originalRequestFactory
     }
+
+    @Test
+    fun isWrongNodeNotSaving() {
+        // Let
+        val loginToken: String = registerDemoUser()
+        val url: String = "$baseUrl:$port/api/admin/node/register"
+        val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
+            id = 10,
+            hostName = "testing",
+            hostPort = "9090",
+            ipAddress = "whatever"
+        )
+
+        // do work
+        val httpHeaders: HttpHeaders = HttpHeaders().apply {
+            add("X-AUTH-TOKEN", loginToken)
+        }
+        val responseEntity: ResponseEntity<String> =
+            testRestTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                HttpEntity<NodeSaveRequestDto>(nodeSaveRequestDto, httpHeaders)
+            )
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 }
