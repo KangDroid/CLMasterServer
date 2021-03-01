@@ -17,6 +17,7 @@ import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -242,7 +243,7 @@ class NodeServiceTest {
         )
 
         // do work[Successful one]
-        var userImageResponseEntity: ResponseEntity<Response> = nodeService.createContainer(userImageSaveRequestDto)
+        var userImageResponseEntity: ResponseEntity<UserImageResponseDto> = nodeService.createContainer(userImageSaveRequestDto)
         assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(userImageResponseEntity.body).isNotEqualTo(null)
 
@@ -254,15 +255,22 @@ class NodeServiceTest {
 
         // do work[Failure: Wrong Compute Region]
         userImageSaveRequestDto.computeRegion = ""
-        userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
-        assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
-        assertThat((userImageResponseEntity.body as ErrorResponse).errorMessage).isEqualTo("Cannot find Compute Region!")
+        runCatching {
+            userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
+        }.onSuccess {
+            fail("Seems like this should fail, but succeed somehow!")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Cannot find Compute Region!")
+        }
         userImageSaveRequestDto.computeRegion = returnValue.regionName // restore region
 
         // do work[Failure: Wrong token somehow]
         userImageSaveRequestDto.userToken = ""
-        userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
-        assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        runCatching {
+            userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
+        }.onSuccess {
+            fail("Seems like this should fail, but succeed somehow!")
+        }
         userImageSaveRequestDto.userToken = loginToken // restore token
 
         // setup mock
@@ -273,9 +281,13 @@ class NodeServiceTest {
             .andRespond(withServerError()) // Internal Error
 
         // do work[Failure: Compute Node Error]
-        userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
-        assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        assertThat((userImageResponseEntity.body as ErrorResponse).errorMessage).isEqualTo("Cannot communicate with Compute node!")
+        runCatching {
+            userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
+        }.onSuccess {
+            fail("Seems like this should fail, but succeed somehow!")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Cannot communicate with Compute node!")
+        }
 
         mockServerFailing.verify()
         nodeService.restTemplate.requestFactory = originalRequestFactory // Restore working server

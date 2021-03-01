@@ -11,6 +11,8 @@ import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
+import com.kangdroid.master.error.exception.NotFoundException
+import com.kangdroid.master.error.exception.UnknownErrorException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -53,25 +55,21 @@ class NodeService {
      * returns: UserImageResponseDto - Containing Full information about container
      * returns: UserImageResponseDto - Containing Error Message.
      */
-    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): ResponseEntity<Response> {
+    fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): ResponseEntity<UserImageResponseDto> {
         // Find Compute Node information given DTO - to register image on that container.
         val node: Node = nodeRepository.findByRegionName(userImageSaveRequestDto.computeRegion) ?: run {
-            return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponse(HttpStatus.NOT_FOUND, "Cannot find Compute Region!"))
+            throw NotFoundException("Cannot find Compute Region!")
         }
 
         // Request compute-node to create a fresh container
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
         val responseEntity: ResponseEntity<UserImageResponseDto> =
-            kotlin.runCatching<ResponseEntity<UserImageResponseDto>> {
+            runCatching<ResponseEntity<UserImageResponseDto>> {
                 restTemplate.postForEntity(url, UserImageResponseDto::class.java)
             }.onFailure {
                 println(it.stackTraceToString())
             }.getOrNull() ?: run {
-                return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot communicate with Compute node!"))
+                throw UnknownErrorException("Cannot communicate with Compute node!")
             }
 
         val userImageResponseDto: UserImageResponseDto = responseEntity.body!!
@@ -81,9 +79,7 @@ class NodeService {
         val checkResponse: String = userService.saveWithCheck(userImageSaveRequestDto.userToken, userImageResponseDto)
 
         if (checkResponse != "") {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, checkResponse))
+            throw UnknownErrorException(checkResponse)
         }
 
         return ResponseEntity

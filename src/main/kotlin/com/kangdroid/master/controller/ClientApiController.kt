@@ -1,9 +1,6 @@
 package com.kangdroid.master.controller
 
-import com.kangdroid.master.data.docker.dto.UserImageListResponseDto
-import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
-import com.kangdroid.master.data.docker.dto.UserRestartRequestDto
-import com.kangdroid.master.data.docker.dto.UserRestartResponseDto
+import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
@@ -70,7 +67,7 @@ class ClientApiController {
     fun createContainer(
         @RequestBody userImageSaveRequestDto: UserImageSaveRequestDto,
         @RequestHeader httpHeaders: HttpHeaders
-    ): ResponseEntity<*> {
+    ): ResponseEntity<UserImageResponseDto> {
         val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         userImageSaveRequestDto.userToken = tokenList[0]
 
