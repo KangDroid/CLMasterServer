@@ -175,7 +175,7 @@ class UserServiceTest {
             userService.registerUser(userRegisterDto).body as UserRegisterResponseDto
 
         // Trying Login
-        var loginResponseEntity: ResponseEntity<Response> = userService.loginUser(
+        var loginResponseEntity: ResponseEntity<UserLoginResponseDto> = userService.loginUser(
             UserLoginRequestDto(
                 userName = userRegisterDto.userName,
                 userPassword = userRegisterDto.userPassword
@@ -183,7 +183,7 @@ class UserServiceTest {
         )
         assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
 
-        var loginResponse: UserLoginResponseDto = loginResponseEntity.body as UserLoginResponseDto
+        var loginResponse: UserLoginResponseDto = loginResponseEntity.body!!
         // Login Assert
         assertThat(loginResponse.errorMessage).isEqualTo("")
         assertThat(loginResponse.token).isNotEqualTo("")
@@ -197,33 +197,39 @@ class UserServiceTest {
             )
         )
         assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
-        loginResponse = loginResponseEntity.body as UserLoginResponseDto
+        loginResponse = loginResponseEntity.body!!
 
         // Login Assert
         assertThat(loginResponse.errorMessage).isEqualTo("")
         assertThat(loginResponse.token).isEqualTo(curToken)
 
         // Wrong Login - ID
-        loginResponseEntity = userService.loginUser(
-            UserLoginRequestDto(
-                userName = "ID_INCORRECT",
-                userPassword = userRegisterDto.userPassword
+        runCatching {
+            loginResponseEntity = userService.loginUser(
+                UserLoginRequestDto(
+                    userName = "ID_INCORRECT",
+                    userPassword = userRegisterDto.userPassword
+                )
             )
-        )
-        assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
-        var errorResponse: ErrorResponse = loginResponseEntity.body as ErrorResponse
-        assertThat(errorResponse.errorMessage).isNotEqualTo("")
+        }.onSuccess {
+            fail("This test should be failed, but it somehow succeed!")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Cannot find user: ID_INCORRECT")
+        }
 
         // Wrong Login - PW
-        loginResponseEntity = userService.loginUser(
-            UserLoginRequestDto(
-                userName = userRegisterDto.userName,
-                userPassword = "WrongPassword"
+        runCatching {
+            loginResponseEntity = userService.loginUser(
+                UserLoginRequestDto(
+                    userName = userRegisterDto.userName,
+                    userPassword = "WrongPassword"
+                )
             )
-        )
-        assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-        errorResponse = loginResponseEntity.body as ErrorResponse
-        assertThat(errorResponse.errorMessage).isNotEqualTo("")
+        }.onSuccess {
+            fail("This test should be failed, but it somehow succeed!")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Password is incorrect!")
+        }
     }
 
     @Test

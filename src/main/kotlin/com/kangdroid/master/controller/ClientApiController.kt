@@ -6,6 +6,7 @@ import com.kangdroid.master.data.docker.dto.UserRestartRequestDto
 import com.kangdroid.master.data.docker.dto.UserRestartResponseDto
 import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
+import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.error.Response
@@ -32,7 +33,7 @@ class ClientApiController {
     }
 
     @PostMapping("/api/client/login")
-    fun login(@RequestBody userLoginRequestDto: UserLoginRequestDto): ResponseEntity<Response> {
+    fun login(@RequestBody userLoginRequestDto: UserLoginRequestDto): ResponseEntity<UserLoginResponseDto> {
         return userService.loginUser(userLoginRequestDto)
     }
 

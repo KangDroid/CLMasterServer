@@ -197,11 +197,34 @@ class ClientApiControllerTest {
             userName = userRegisterDto.userName,
             userPassword = userRegisterDto.userPassword
         )
+
+        // Working Request
         val responseEntity: ResponseEntity<UserLoginResponseDto> =
             testRestTemplate.postForEntity(finalUrl, userLoginRequestDto, UserLoginResponseDto::class)
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotEqualTo(null)
         assertThat(responseEntity.body!!.token).isNotEqualTo("")
+
+        // Failure: Wrong ID
+        userLoginRequestDto.userName = "NOT_WORKING"
+        var failResponseEntity: ResponseEntity<ErrorResponse> =
+            testRestTemplate.postForEntity(finalUrl, userLoginRequestDto)
+        with(failResponseEntity) {
+            assertThat(statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+            assertThat(body).isNotEqualTo(null)
+            assertThat(body!!.errorMessage).isNotEqualTo("")
+        }
+        userLoginRequestDto.userName = userRegisterDto.userName
+
+        // Failure: Wrong Password
+        userLoginRequestDto.userPassword = "TesTING_PASS"
+        failResponseEntity =
+            testRestTemplate.postForEntity(finalUrl, userLoginRequestDto)
+        with(failResponseEntity) {
+            assertThat(statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+            assertThat(body).isNotEqualTo(null)
+            assertThat(body!!.errorMessage).isEqualTo("Password is incorrect!")
+        }
     }
 
     @Test

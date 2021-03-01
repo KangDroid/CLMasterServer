@@ -8,6 +8,8 @@ import com.kangdroid.master.data.user.dto.*
 import com.kangdroid.master.error.exception.ConflictException
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
+import com.kangdroid.master.error.exception.ForbiddenException
+import com.kangdroid.master.error.exception.NotFoundException
 import com.kangdroid.master.error.exception.UnknownErrorException
 import com.kangdroid.master.security.JWTTokenProvider
 import org.hibernate.exception.ConstraintViolationException
@@ -70,19 +72,15 @@ class UserService {
             .body(userRegisterResponseDto)
     }
 
-    fun loginUser(userLoginRequestDto: UserLoginRequestDto): ResponseEntity<Response> {
+    fun loginUser(userLoginRequestDto: UserLoginRequestDto): ResponseEntity<UserLoginResponseDto> {
         // UserLoginResponseDto
         val user: User = userRepository.findByUserName(userLoginRequestDto.userName)
-            ?: return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponse(HttpStatus.NOT_FOUND, "Cannot find user: ${userLoginRequestDto.userName}"))
+            ?: throw NotFoundException("Cannot find user: ${userLoginRequestDto.userName}")
 
         runCatching {
             require(passwordEncoder.isMatching(userLoginRequestDto.userPassword, user.password)) { "Wrong Password" }
         }.onFailure {
-            return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(ErrorResponse(HttpStatus.FORBIDDEN, "Password is incorrect!"))
+            throw ForbiddenException("Password is incorrect!")
         }
 
         return ResponseEntity
