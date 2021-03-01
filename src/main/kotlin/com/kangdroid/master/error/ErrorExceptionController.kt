@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 @ControllerAdvice
 class ErrorExceptionController {
     @ExceptionHandler(ConflictException::class)
-    fun handleConflict(conflictException: ConflictException) : ResponseEntity<ErrorResponse> {
+    fun handleConflict(conflictException: ConflictException): ResponseEntity<ErrorResponse> {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
             .body(

@@ -256,7 +256,8 @@ class NodeServiceTest {
         )
 
         // do work[Successful one]
-        var userImageResponseEntity: ResponseEntity<UserImageResponseDto> = nodeService.createContainer(userImageSaveRequestDto)
+        var userImageResponseEntity: ResponseEntity<UserImageResponseDto> =
+            nodeService.createContainer(userImageSaveRequestDto)
         assertThat(userImageResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(userImageResponseEntity.body).isNotEqualTo(null)
 

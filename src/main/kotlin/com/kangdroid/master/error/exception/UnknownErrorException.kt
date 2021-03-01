@@ -1,3 +1,3 @@
 package com.kangdroid.master.error.exception
 
-class UnknownErrorException(message: String): RuntimeException(message)
+class UnknownErrorException(message: String) : RuntimeException(message)
