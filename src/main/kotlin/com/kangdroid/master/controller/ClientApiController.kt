@@ -56,7 +56,7 @@ class ClientApiController {
      * getNodeListUser(param token) Get List of node for corresponding user.
      */
     @GetMapping("/api/client/container")
-    fun getClientContainerList(@RequestHeader httpHeaders: HttpHeaders): List<UserImageListResponseDto> {
+    fun getClientContainerList(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<List<UserImageListResponseDto>> {
         val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         return userService.listContainer(tokenList[0])
     }

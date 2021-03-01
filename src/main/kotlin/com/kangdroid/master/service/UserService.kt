@@ -119,15 +119,11 @@ class UserService {
      * Returns Zero or more lists of nodes
      * Returns One DTO with errorMessage.
      */
-    fun listContainer(userToken: String): List<UserImageListResponseDto> {
+    fun listContainer(userToken: String): ResponseEntity<List<UserImageListResponseDto>> {
         val userName: String = getUserName(userToken)
-            ?: return listOf(
-                UserImageListResponseDto("", "", "", "Cannot Find User. Please Re-Login")
-            )
+            ?: throw NotFoundException("Cannot Find User. Please Re-Login")
         val user: User = userRepository.findByUserName(userName)
-            ?: return listOf(
-                UserImageListResponseDto("", "", "", "Cannot Find User. Please Re-Login")
-            )
+            ?: throw NotFoundException("Cannot Find User. Please Re-Login")
 
         val mutableImageList: MutableList<UserImageListResponseDto> = mutableListOf()
         for (dockerImage in user.dockerImage) {
@@ -140,7 +136,9 @@ class UserService {
             )
         }
 
-        return mutableImageList.toList()
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(mutableImageList.toList())
     }
 
     /**

@@ -237,15 +237,24 @@ class UserServiceTest {
         val loginToken = registerDemoUser()
 
         // Those above procedure was long, but register op.
-        var responseList: List<UserImageListResponseDto> = userService.listContainer(loginToken)
+        var responseEntity: ResponseEntity<List<UserImageListResponseDto>> =
+            userService.listContainer(loginToken)
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        var responseList: List<UserImageListResponseDto> = responseEntity.body!!
 
         // There should be no list at all, because there is no registered container though.
         assertThat(responseList.size).isEqualTo(0)
 
         // Wrong Input
-        responseList = userService.listContainer("")
-        assertThat(responseList.size).isEqualTo(1)
-        assertThat(responseList[0].errorMessage).isEqualTo("Cannot Find User. Please Re-Login")
+        runCatching {
+            userService.listContainer("a")
+        }.onSuccess {
+            fail("This should be failed, but somehow it succeed!")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Cannot Find User. Please Re-Login")
+        }
 
         // With Some dummy image
         val userName: String? = userService.getUserName(loginToken)
@@ -261,9 +270,12 @@ class UserServiceTest {
         )
         userRepository.save(user)
 
-        responseList = userService.listContainer(loginToken)
+        responseEntity = userService.listContainer(loginToken)
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        responseList = responseEntity.body!!
         assertThat(responseList.size).isEqualTo(1)
-        assertThat(responseList[0].errorMessage).isEqualTo("")
     }
 
     @Test

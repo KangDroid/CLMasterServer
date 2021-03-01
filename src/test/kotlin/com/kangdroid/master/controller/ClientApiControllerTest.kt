@@ -441,7 +441,7 @@ class ClientApiControllerTest {
         // Request[Failure: Wrong Token]
         headers.clear()
         headers.set("X-AUTH-TOKEN", "a")
-        var responseString: ResponseEntity<String> =
+        var responseString: ResponseEntity<ErrorResponse> =
             testRestTemplate.exchange(finalUrl, HttpMethod.GET, HttpEntity<Void>(headers), String::class)
         assertThat(responseString.body).isNotEqualTo(null)
         assertThat(responseString.statusCode).isEqualTo(HttpStatus.FORBIDDEN)

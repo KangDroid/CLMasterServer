@@ -4,5 +4,4 @@ class UserImageListResponseDto(
     var userName: String = "",
     var dockerId: String = "",
     var computeRegion: String = "",
-    var errorMessage: String = ""
 )
