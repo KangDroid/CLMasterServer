@@ -1,6 +1,7 @@
 package com.kangdroid.master.error
 
 import com.kangdroid.master.error.exception.ConflictException
+import com.kangdroid.master.error.exception.ForbiddenException
 import com.kangdroid.master.error.exception.UnknownErrorException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -29,6 +30,18 @@ class ErrorExceptionController {
                 ErrorResponse(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     unknownErrorException.message ?: "No Message"
+                )
+            )
+    }
+
+    @ExceptionHandler(ForbiddenException::class)
+    fun handleForbiddenException(forbiddenException: ForbiddenException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(
+                ErrorResponse(
+                    HttpStatus.FORBIDDEN,
+                    forbiddenException.message ?: "No Message"
                 )
             )
     }
