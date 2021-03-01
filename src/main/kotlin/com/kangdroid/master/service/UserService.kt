@@ -5,8 +5,10 @@ import com.kangdroid.master.data.docker.dto.*
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.*
+import com.kangdroid.master.error.exception.EmailConflictException
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
+import com.kangdroid.master.error.exception.UnknownErrorException
 import com.kangdroid.master.security.JWTTokenProvider
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,7 +43,7 @@ class UserService {
         return userName
     }
 
-    fun registerUser(userRegisterDto: UserRegisterDto): ResponseEntity<Response> {
+    fun registerUser(userRegisterDto: UserRegisterDto): ResponseEntity<UserRegisterResponseDto> {
         lateinit var userRegisterResponseDto: UserRegisterResponseDto
         runCatching {
             userRepository.save(
@@ -56,14 +58,10 @@ class UserService {
                 registeredId = it.userName,
             )
         }.onFailure {
-            return if (it.cause is ConstraintViolationException) {
-                ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(ErrorResponse(HttpStatus.CONFLICT, "E-Mail address is already registered!"))
+            if (it.cause is ConstraintViolationException) {
+                throw EmailConflictException("E-Mail address is already registered!")
             } else {
-                ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown Throw: ${it.cause.toString()}"))
+                throw UnknownErrorException("Unknown Throw: ${it.cause.toString()}")
             }
         }
 

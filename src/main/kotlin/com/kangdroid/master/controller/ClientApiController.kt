@@ -7,6 +7,7 @@ import com.kangdroid.master.data.docker.dto.UserRestartResponseDto
 import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
+import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.error.Response
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
@@ -26,7 +27,7 @@ class ClientApiController {
 
     // Just for testing with postman
     @PostMapping("/api/client/register")
-    fun register(@RequestBody userRegisterDto: UserRegisterDto): ResponseEntity<Response> {
+    fun register(@RequestBody userRegisterDto: UserRegisterDto): ResponseEntity<UserRegisterResponseDto> {
         return userService.registerUser(userRegisterDto)
     }
 

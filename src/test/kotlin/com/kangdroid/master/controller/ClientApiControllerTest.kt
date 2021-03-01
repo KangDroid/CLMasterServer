@@ -11,6 +11,7 @@ import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
@@ -137,7 +138,7 @@ class ClientApiControllerTest {
             userName = "KangDroid",
             userPassword = "TestingPassword"
         )
-        val responseEntity: ResponseEntity<Response> = userService.registerUser(userRegisterDto)
+        val responseEntity: ResponseEntity<UserRegisterResponseDto> = userService.registerUser(userRegisterDto)
 
         // Trying Login
         val loginResponse: UserLoginResponseDto = userService.loginUser(
@@ -157,6 +158,8 @@ class ClientApiControllerTest {
             userName = "testUser",
             userPassword = "testPassword"
         )
+
+        // With Successfull Testing
         val responseEntity: ResponseEntity<UserRegisterResponseDto> =
             testRestTemplate.postForEntity(finalUrl, userRegisterDto, UserRegisterResponseDto::class)
 
@@ -166,6 +169,13 @@ class ClientApiControllerTest {
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotEqualTo(null)
         assertThat((responseEntity.body)!!.registeredId).isEqualTo(userRegisterDto.userName)
+
+        // Failure: Re-Register should throw EmailConflictException
+        val failResponseEntity: ResponseEntity<ErrorResponse> =
+            testRestTemplate.postForEntity(finalUrl, userRegisterDto)
+        assertThat(failResponseEntity.statusCode).isEqualTo(HttpStatus.CONFLICT)
+        assertThat(failResponseEntity.body).isNotEqualTo(null)
+        assertThat(failResponseEntity.body!!.errorMessage).isEqualTo("E-Mail address is already registered!")
     }
 
     @Test

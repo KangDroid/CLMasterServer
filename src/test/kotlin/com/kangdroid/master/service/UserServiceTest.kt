@@ -14,6 +14,7 @@ import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.error.Response
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -143,7 +144,7 @@ class UserServiceTest {
             userName = "KangDroid",
             userPassword = "TestingPassword"
         )
-        var registerResponseEntity: ResponseEntity<Response> = userService.registerUser(userRegisterDto)
+        var registerResponseEntity: ResponseEntity<UserRegisterResponseDto> = userService.registerUser(userRegisterDto)
         assertThat(registerResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(registerResponseEntity.body).isNotEqualTo(null)
 
@@ -154,13 +155,13 @@ class UserServiceTest {
         assertThat(registerResponse.registeredId).isEqualTo(userRegisterDto.userName)
 
         // Do work[Failure: Username Exists!]
-        registerResponseEntity = userService.registerUser(userRegisterDto)
-        assertThat(registerResponseEntity.statusCode).isEqualTo(HttpStatus.CONFLICT)
-
-        val errorResponse: ErrorResponse = registerResponseEntity.body as ErrorResponse
-        assertThat(errorResponse.errorMessage).isNotEqualTo("")
-        assertThat(errorResponse.errorMessage).isEqualTo("E-Mail address is already registered!")
-        assertThat(errorResponse.httpStatus).isEqualTo(HttpStatus.CONFLICT)
+        runCatching {
+            registerResponseEntity = userService.registerUser(userRegisterDto)
+        }.onSuccess {
+            fail("This test should be failed, but it somehow succeed!")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("E-Mail address is already registered!")
+        }
     }
 
     @Test

@@ -7,6 +7,7 @@ import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
+import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.error.Response
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
@@ -68,7 +69,7 @@ class AdminApiControllerTest {
             userName = "KangDroid",
             userPassword = "TestingPassword"
         )
-        val responseEntity: ResponseEntity<Response> = userService.registerUser(userRegisterDto)
+        val responseEntity: ResponseEntity<UserRegisterResponseDto> = userService.registerUser(userRegisterDto)
 
         // Trying Login
         val loginResponse: UserLoginResponseDto = userService.loginUser(
