@@ -1,7 +1,5 @@
 package com.kangdroid.master.data.docker.dto
 
-import com.kangdroid.master.error.Response
-
 /**
  * UserImageResponseDto: When createContainer called, get all of those information and return them.
  *
@@ -16,4 +14,4 @@ class UserImageResponseDto(
     var targetPort: String = "",
     var containerId: String = "",
     var regionLocation: String = ""
-) : Response
+)

@@ -10,7 +10,6 @@ import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.error.ErrorResponse
-import com.kangdroid.master.error.Response
 import com.kangdroid.master.error.exception.ConflictException
 import com.kangdroid.master.error.exception.NotFoundException
 import com.kangdroid.master.error.exception.UnknownErrorException

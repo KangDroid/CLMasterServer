@@ -7,7 +7,7 @@ class ErrorResponse(
     @JsonIgnore
     val httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     val errorMessage: String = ""
-) : Response {
+) {
     var statusCode: String = httpStatus.value().toString()
     var statusMessage: String = httpStatus.reasonPhrase
 }

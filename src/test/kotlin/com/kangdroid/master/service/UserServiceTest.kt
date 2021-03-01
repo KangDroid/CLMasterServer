@@ -12,7 +12,6 @@ import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.error.ErrorResponse
-import com.kangdroid.master.error.Response
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.After
