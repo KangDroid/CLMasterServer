@@ -186,7 +186,6 @@ class UserServiceTest {
 
         var loginResponse: UserLoginResponseDto = loginResponseEntity.body!!
         // Login Assert
-        assertThat(loginResponse.errorMessage).isEqualTo("")
         assertThat(loginResponse.token).isNotEqualTo("")
 
         // Re-Login for making sure same token is returned.
@@ -201,7 +200,6 @@ class UserServiceTest {
         loginResponse = loginResponseEntity.body!!
 
         // Login Assert
-        assertThat(loginResponse.errorMessage).isEqualTo("")
         assertThat(loginResponse.token).isEqualTo(curToken)
 
         // Wrong Login - ID

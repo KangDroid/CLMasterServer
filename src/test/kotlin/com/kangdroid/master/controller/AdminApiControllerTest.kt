@@ -57,7 +57,7 @@ class AdminApiControllerTest {
     @After
     fun cleanDb() {
         nodeRepository.deleteAll()
-        userRepository.deleteAll()
+        // userRepository.deleteAll()
     }
 
     // Register Demo User for testing purpose.
