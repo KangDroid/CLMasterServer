@@ -28,9 +28,11 @@ class SecurityConfig(private val jwtTokenProvider: JWTTokenProvider) : WebSecuri
             .antMatchers(
                 "/api/client/node",
                 "/api/client/container",
-                "/api/client/restart",
-                "/api/admin/node/register"
+                "/api/client/restart"
             ).hasRole("USER")
+            .antMatchers(
+                "/api/admin/node/register"
+            ).hasRole("ADMIN")
             .antMatchers("/**").permitAll()
             .and()
             .addFilterBefore(

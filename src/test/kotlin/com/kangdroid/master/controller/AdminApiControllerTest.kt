@@ -65,10 +65,9 @@ class AdminApiControllerTest {
     fun registerDemoUser(): String {
         // Register Operation
         val userRegisterDto: UserRegisterDto = UserRegisterDto(
-            userName = "KangDroid",
-            userPassword = "TestingPassword"
+            userName = "root",
+            userPassword = "testPassword"
         )
-        val responseEntity: ResponseEntity<UserRegisterResponseDto> = userService.registerUser(userRegisterDto)
 
         // Trying Login
         val loginResponse: UserLoginResponseDto = userService.loginUser(
