@@ -10,10 +10,7 @@ import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
-import com.kangdroid.master.data.user.dto.UserLoginRequestDto
-import com.kangdroid.master.data.user.dto.UserLoginResponseDto
-import com.kangdroid.master.data.user.dto.UserRegisterDto
-import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.data.user.dto.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.After
@@ -362,5 +359,37 @@ class UserServiceTest {
         }
         nodeService.restTemplate.requestFactory =
             originalRequestFactory // Restore requestFactory on nodeServer's restTemplate
+    }
+
+    @Test
+    fun is_getUserInformation_returning_NotFound_invalid_token() {
+        runCatching {
+            userService.getUserInformation("test")
+        }.onSuccess {
+            fail("Wrong token is passed, but somehow test succeed!")
+        }.onFailure {
+            assertThat(it.message).isEqualTo("Cannot find user!")
+        }
+    }
+
+    @Test
+    fun is_getUserInformation_returning_ok() {
+        val loginToken: String = registerDemoUser()
+        val requiredUserInformationResponse: UserInformationResponseDto =
+            UserInformationResponseDto(
+                userName = "KangDroid",
+                userRole = setOf("ROLE_USER")
+            )
+
+        val responseResponse: ResponseEntity<UserInformationResponseDto>? = runCatching {
+            userService.getUserInformation(loginToken)
+        }.onFailure {
+            fail("This test should be passed with correct token, but it failed!")
+        }.getOrNull()
+
+        assertThat(responseResponse).isNotEqualTo(null)
+        assertThat(responseResponse!!.hasBody()).isEqualTo(true)
+        assertThat(responseResponse.body!!.userName).isEqualTo(requiredUserInformationResponse.userName)
+        assertThat(responseResponse.body!!.userRole).isEqualTo(requiredUserInformationResponse.userRole)
     }
 }

@@ -31,6 +31,18 @@ class UserService {
     @Autowired
     private lateinit var passwordEncoder: PasswordEncryptorService
 
+    fun getUserInformation(token: String): ResponseEntity<UserInformationResponseDto> {
+        val userName: String = getUserName(token) ?: throw NotFoundException("Cannot find user!")
+        val userEntity: User = userRepository.findByUserName(userName) ?: throw NotFoundException("Cannot find User!")
+
+        return ResponseEntity.ok(
+            UserInformationResponseDto(
+                userName = userEntity.userName,
+                userRole = userEntity.roles
+            )
+        )
+    }
+
     fun getUserName(token: String): String? {
         var userName: String? = null
         runCatching {
