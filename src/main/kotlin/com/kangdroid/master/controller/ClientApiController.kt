@@ -5,10 +5,7 @@ import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.docker.dto.UserRestartRequestDto
 import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
-import com.kangdroid.master.data.user.dto.UserLoginRequestDto
-import com.kangdroid.master.data.user.dto.UserLoginResponseDto
-import com.kangdroid.master.data.user.dto.UserRegisterDto
-import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.data.user.dto.*
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,6 +55,15 @@ class ClientApiController {
     fun getClientContainerList(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<List<UserImageListResponseDto>> {
         val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         return userService.listContainer(tokenList[0])
+    }
+
+    /**
+     * getClientInformation(param token) get current client information
+     */
+    @GetMapping("/api/client/info")
+    fun getClientInformation(@RequestHeader httpHeaders: HttpHeaders): ResponseEntity<UserInformationResponseDto> {
+        val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
+        return userService.getUserInformation(tokenList[0])
     }
 
     /**

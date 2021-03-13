@@ -7,10 +7,7 @@ import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.UserRepository
-import com.kangdroid.master.data.user.dto.UserLoginRequestDto
-import com.kangdroid.master.data.user.dto.UserLoginResponseDto
-import com.kangdroid.master.data.user.dto.UserRegisterDto
-import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.data.user.dto.*
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
@@ -447,5 +444,26 @@ class ClientApiControllerTest {
             testRestTemplate.exchange(finalUrl, HttpMethod.GET, HttpEntity<Void>(headers), String::class)
         assertThat(responseString.body).isNotEqualTo(null)
         assertThat(responseString.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+    }
+
+    @Test
+    fun is_getClientInformation_works_well() {
+        val finalUrl: String = "$baseUrl:$port/api/client/info"
+        val loginToken: String = registerDemoUser()
+
+        // Set HTTP Headers
+        val headers: HttpHeaders = HttpHeaders()
+        headers.set("X-AUTH-TOKEN", loginToken)
+
+        // Set Entity
+        val entity: HttpEntity<String> = HttpEntity<String>(headers)
+
+        // Request[Successful one]
+        val responseEntity: ResponseEntity<UserInformationResponseDto> =
+            testRestTemplate.exchange(finalUrl, HttpMethod.GET, entity)
+        assertThat(responseEntity.body).isNotEqualTo(null)
+
+        val responseValue: UserInformationResponseDto = responseEntity.body!!
+        assertThat(responseValue.userName).isNotEmpty
     }
 }
