@@ -11,6 +11,8 @@ import com.kangdroid.master.error.exception.NotFoundException
 import com.kangdroid.master.error.exception.UnknownErrorException
 import com.kangdroid.master.security.JWTTokenProvider
 import org.hibernate.exception.ConstraintViolationException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -31,10 +33,20 @@ class UserService {
     @Autowired
     private lateinit var passwordEncoder: PasswordEncryptorService
 
-    fun getUserInformation(token: String): ResponseEntity<UserInformationResponseDto> {
-        val userName: String = getUserName(token) ?: throw NotFoundException("Cannot find user!")
-        val userEntity: User = userRepository.findByUserName(userName) ?: throw NotFoundException("Cannot find User!")
+    // Default Logger
+    private val logger: Logger = LoggerFactory.getLogger(UserService::class.java)
 
+    fun getUserInformation(token: String): ResponseEntity<UserInformationResponseDto> {
+        val userName: String = getUserName(token) ?: run {
+            logger.error("Token is acquired but cannot find user.")
+            throw NotFoundException("Cannot find user!")
+        }
+        val userEntity: User = userRepository.findByUserName(userName) ?: run {
+            logger.error("Username is acquired but cannot find user. Something went wrong.")
+            throw NotFoundException("Cannot find User!")
+        }
+
+        logger.debug("getUserInformation succeed. It should return OK sign with correct body now.")
         return ResponseEntity.ok(
             UserInformationResponseDto(
                 userName = userEntity.userName,
@@ -48,7 +60,8 @@ class UserService {
         runCatching {
             userName = jwtTokenProvider.getUserPk(token)
         }.onFailure {
-            println(it.stackTraceToString())
+            logger.error("Error occurred when getting username!")
+            logger.error("StackTrace: ${it.stackTraceToString()}")
             userName = null
         }
 
@@ -70,6 +83,8 @@ class UserService {
                 registeredId = it.userName,
             )
         }.onFailure {
+            logger.error("Error occurred when registering user!")
+            logger.error("StackTrace: ${it.stackTraceToString()}")
             if (it.cause is ConstraintViolationException) {
                 throw ConflictException("E-Mail address is already registered!")
             } else {
@@ -90,6 +105,8 @@ class UserService {
         runCatching {
             require(passwordEncoder.isMatching(userLoginRequestDto.userPassword, user.password)) { "Wrong Password" }
         }.onFailure {
+            logger.error("Error occurred when loginUser called!")
+            logger.error("StackTrace: ${it.stackTraceToString()}")
             throw ForbiddenException("Password is incorrect!")
         }
 
