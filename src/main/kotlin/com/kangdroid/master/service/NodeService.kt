@@ -172,8 +172,8 @@ class NodeService {
 
         // Find Any duplicated registered node. - if duplicated node found, return "Error"
         logger.info("Finding any duplicated region..")
-        val nodeGot: Node = nodeRepository.findByIpAddress(node.ipAddress) ?: Node(id = Long.MAX_VALUE, "", "", "", "")
-        if (nodeGot.id != Long.MAX_VALUE) {
+        val nodeGot: Node = nodeRepository.findByIpAddress(node.ipAddress) ?: Node(hostName = "SHOULD_HERE")
+        if (nodeGot.hostName != "SHOULD_HERE") {
             logger.error("Duplicated compute node is found on IP Address: ${node.ipAddress}")
             throw ConflictException("Duplicated Compute Node is found on IP Address: ${node.ipAddress}")
         }

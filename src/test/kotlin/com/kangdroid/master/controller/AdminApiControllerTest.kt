@@ -11,6 +11,7 @@ import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
 import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -100,7 +101,7 @@ class AdminApiControllerTest {
         val loginToken: String = registerDemoUser()
         val url: String = "$baseUrl:$port/api/admin/node/register"
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
@@ -130,7 +131,7 @@ class AdminApiControllerTest {
         val loginToken: String = registerDemoUser()
         val url: String = "$baseUrl:$port/api/admin/node/register"
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = "9090",
             ipAddress = "whatever"

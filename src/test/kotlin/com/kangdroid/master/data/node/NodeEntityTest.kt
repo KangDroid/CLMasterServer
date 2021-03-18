@@ -1,6 +1,7 @@
 package com.kangdroid.master.data.node
 
 import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,7 +25,7 @@ class NodeEntityTest {
     fun isSaveWorks() {
         // Let
         val nodeTmp: Node = Node(
-            id = 1000,
+            id = ObjectId(),
             hostName = "localhost",
             ipAddress = "192.168.0.8",
             hostPort = "8080",

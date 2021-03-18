@@ -16,6 +16,7 @@ import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
+import org.bson.types.ObjectId
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -152,7 +153,7 @@ class NodeServiceTest {
     fun isGetLoadWorksWell() {
         // Let
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
@@ -175,7 +176,7 @@ class NodeServiceTest {
     fun isSavingWorksWell() {
         // Let
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
@@ -211,7 +212,7 @@ class NodeServiceTest {
         runCatching {
             returnEntity = nodeService.save(
                 NodeSaveRequestDto(
-                    id = 10,
+                    id = ObjectId(),
                     hostName = "",
                     hostPort = "9090",
                     ipAddress = "whatever"
@@ -242,7 +243,7 @@ class NodeServiceTest {
         // Register Compute Node
         // Let
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
@@ -315,7 +316,7 @@ class NodeServiceTest {
         // Register Compute Node
         // Let
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName

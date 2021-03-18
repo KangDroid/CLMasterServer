@@ -1,6 +1,7 @@
 package com.kangdroid.master.data.node.dto
 
 import com.kangdroid.master.data.node.Node
+import org.bson.types.ObjectId
 
 /**
  * NodeSaveRequestDto: Used when Admin registers compute node to master server.
@@ -13,7 +14,7 @@ import com.kangdroid.master.data.node.Node
  * [regionName] will be initialized after creating dto.
  */
 class NodeSaveRequestDto(
-    var id: Long,
+    var id: ObjectId,
     var hostName: String,
     var hostPort: String,
     var ipAddress: String

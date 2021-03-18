@@ -1,22 +1,15 @@
 package com.kangdroid.master.data.node
 
+import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.mapping.Document
 import javax.persistence.*
 
-@Entity
+@Document(collection = "node")
 class Node(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = Long.MAX_VALUE,
-
-    @Column(length = 500, nullable = false)
-    var hostName: String,
-
-    @Column(length = 500, nullable = false)
-    var ipAddress: String,
-
-    @Column(length = 500, nullable = false)
-    var hostPort: String,
-
-    @Column(length = 500, nullable = false)
-    var regionName: String
+    var id: ObjectId = ObjectId.get(),
+    var hostName: String = "",
+    var ipAddress: String = "",
+    var hostPort: String = "",
+    var regionName: String = ""
 )

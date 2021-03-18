@@ -13,6 +13,7 @@ import com.kangdroid.master.data.user.UserRepository
 import com.kangdroid.master.data.user.dto.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
+import org.bson.types.ObjectId
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -295,7 +296,7 @@ class UserServiceTest {
         // Register Compute Node
         // Let
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName

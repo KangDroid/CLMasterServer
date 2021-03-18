@@ -12,6 +12,7 @@ import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.service.NodeService
 import com.kangdroid.master.service.UserService
 import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -243,7 +244,7 @@ class ClientApiControllerTest {
         val urlFinal: String = "$baseUrl:$port/api/client/node"
         // save node first
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
@@ -288,7 +289,7 @@ class ClientApiControllerTest {
 
         // save node first
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
@@ -350,7 +351,7 @@ class ClientApiControllerTest {
 
         // save node first
         val nodeSaveRequestDto: NodeSaveRequestDto = NodeSaveRequestDto(
-            id = 10,
+            id = ObjectId(),
             hostName = "testing",
             hostPort = testConfiguration.computeNodeServerPort,
             ipAddress = testConfiguration.computeNodeServerHostName
