@@ -70,7 +70,13 @@ class UserService {
 
     fun registerUser(userRegisterDto: UserRegisterDto): ResponseEntity<UserRegisterResponseDto> {
         lateinit var userRegisterResponseDto: UserRegisterResponseDto
+
+        if (userRepository.findByUserName(userRegisterDto.userName) != null) {
+            throw ConflictException("E-Mail address is already registered!")
+        }
+
         runCatching {
+
             userRepository.save(
                 User(
                     userName = userRegisterDto.userName,
@@ -85,11 +91,7 @@ class UserService {
         }.onFailure {
             logger.error("Error occurred when registering user!")
             logger.error("StackTrace: ${it.stackTraceToString()}")
-            if (it.cause is ConstraintViolationException) {
-                throw ConflictException("E-Mail address is already registered!")
-            } else {
-                throw UnknownErrorException("Unknown Throw: ${it.cause.toString()}")
-            }
+            throw UnknownErrorException("Unknown Throw: ${it.cause.toString()}")
         }
 
         return ResponseEntity
@@ -134,7 +136,6 @@ class UserService {
             DockerImage(
                 dockerId = userImageResponseDto.containerId,
                 computeRegion = userImageResponseDto.regionLocation,
-                user = user
             )
         )
         userRepository.save(user)

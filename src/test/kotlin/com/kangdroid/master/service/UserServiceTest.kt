@@ -261,7 +261,6 @@ class UserServiceTest {
         user!!.dockerImage.add(
             DockerImage(
                 dockerId = "",
-                user = user,
                 computeRegion = ""
             )
         )

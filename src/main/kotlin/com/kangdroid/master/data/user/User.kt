@@ -1,28 +1,21 @@
 package com.kangdroid.master.data.user
 
 import com.kangdroid.master.data.docker.DockerImage
+import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.stream.Collectors
 import javax.persistence.*
 
-@Entity
+@Document(collection="user")
 class User(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = Long.MAX_VALUE,
-
-    @Column(length = 500, nullable = false, unique = true)
+    var id: ObjectId = ObjectId(),
     var userName: String,
-
-    @Column(length = 500, nullable = false)
     var userPassword: String,
-
-    @ElementCollection(fetch = FetchType.EAGER)
     val roles: Set<String> = setOf(),
-
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = [CascadeType.ALL])
     var dockerImage: MutableList<DockerImage> = mutableListOf()
 ) : UserDetails {
 
