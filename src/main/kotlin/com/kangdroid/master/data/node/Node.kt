@@ -11,5 +11,6 @@ class Node(
     var hostName: String = "",
     var ipAddress: String = "",
     var hostPort: String = "",
-    var regionName: String = ""
+    var regionName: String = "",
+    var containerList: MutableList<String> = mutableListOf()
 )

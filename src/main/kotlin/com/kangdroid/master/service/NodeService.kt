@@ -61,7 +61,10 @@ class NodeService {
     fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): ResponseEntity<UserImageResponseDto> {
         logger.info("createContainer started for user: ${userImageSaveRequestDto.userToken}")
         // Find Compute Node information given DTO - to register image on that container.
-        val node: Node = nodeTemplateRepository.findNodeByRegionName(userImageSaveRequestDto.computeRegion)
+
+        // Find Compute Node - automatically sort out
+        val nodeList: List<Node> = nodeTemplateRepository.findAll(true)
+        val node: Node = nodeList[0]
 
         // Request compute-node to create a fresh container
         logger.info("Requesting to node server...")

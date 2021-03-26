@@ -268,17 +268,6 @@ class NodeServiceTest {
         assertThat(userImageResponseDto.targetPort).isNotEqualTo("")
         assertThat(userImageResponseDto.regionLocation).isEqualTo(returnValue.regionName)
 
-        // do work[Failure: Wrong Compute Region]
-        userImageSaveRequestDto.computeRegion = ""
-        runCatching {
-            userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
-        }.onSuccess {
-            fail("Seems like this should fail, but succeed somehow!")
-        }.onFailure {
-            assertThat(it.message).contains("Cannot find node with region:")
-        }
-        userImageSaveRequestDto.computeRegion = returnValue.regionName // restore region
-
         // do work[Failure: Wrong token somehow]
         userImageSaveRequestDto.userToken = ""
         runCatching {

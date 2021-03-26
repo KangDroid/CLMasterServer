@@ -32,8 +32,14 @@ class NodeTemplateRepository {
         return mongoTemplate.save(node)
     }
 
-    fun findAll(): List<Node> {
-        return mongoTemplate.find(Query(), Node::class.java)
+    fun findAll(containerSort: Boolean = false): List<Node> {
+        val retList: List<Node> = mongoTemplate.find(Query(), Node::class.java)
+        return if (containerSort) {
+            retList.sortedBy {it.containerList.size}
+            retList
+        } else {
+            retList
+        }
     }
 
     fun count(): Long {
