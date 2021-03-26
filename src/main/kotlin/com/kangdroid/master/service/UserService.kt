@@ -180,13 +180,8 @@ class UserService {
     fun restartContainer(userRestartRequestDto: UserRestartRequestDto): ResponseEntity<Void> {
         val userName: String = getUserName(userRestartRequestDto.userToken)
             ?: throw NotFoundException("Cannot find user with token!")
-        val user: User = userTemplateRepository.findByUserName(userName)
 
-        // TODO: Use Query function to update/fetch embedded document?
-        val dockerImageList: MutableList<DockerImage> = user.dockerImage
-        val targetDockerImage: DockerImage = dockerImageList.find {
-            it.dockerId == userRestartRequestDto.containerId
-        } ?: throw NotFoundException("Cannot find container ID!")
+        val targetDockerImage: DockerImage = userTemplateRepository.findDockerImageByContainerID(userName, userRestartRequestDto.containerId)
 
         val errorMessage: String = nodeService.restartContainer(targetDockerImage)
         if (errorMessage.isNotEmpty()) {

@@ -186,20 +186,6 @@ class UserServiceTest {
         // Login Assert
         assertThat(loginResponse.token).isNotEqualTo("")
 
-        // Re-Login for making sure same token is returned.
-        val curToken: String = loginResponse.token
-        loginResponseEntity = userService.loginUser(
-            UserLoginRequestDto(
-                userName = userRegisterDto.userName,
-                userPassword = userRegisterDto.userPassword
-            )
-        )
-        assertThat(loginResponseEntity.statusCode).isEqualTo(HttpStatus.OK)
-        loginResponse = loginResponseEntity.body!!
-
-        // Login Assert
-        assertThat(loginResponse.token).isEqualTo(curToken)
-
         // Wrong Login - ID
         runCatching {
             loginResponseEntity = userService.loginUser(
@@ -340,7 +326,7 @@ class UserServiceTest {
         }.onSuccess {
             fail("Container ID is null, but it responded with - restart was succeed.")
         }.onFailure {
-            assertThat(it.message).isEqualTo("Cannot find container ID!")
+            assertThat(it.message).contains("Cannot find docker image ")
         }
         userRestartRequestDto.containerId = userImageResponseDto.containerId // Restore Container ID
 

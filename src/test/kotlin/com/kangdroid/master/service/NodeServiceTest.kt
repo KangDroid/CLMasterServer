@@ -337,15 +337,8 @@ class NodeServiceTest {
         val userName: String? = userService.getUserName(loginToken)
         assertThat(userName).isNotEqualTo(null) // username should not be equal
 
-        // TODO: Implement Query instead of iterating through list.
         val user: User = userTemplateRepository.findByUserName(userName!!)
-        lateinit var dockerImage: DockerImage
-        for (dockerImageTest in user.dockerImage) {
-            if (dockerImageTest.dockerId == userImageResponseDto.containerId) {
-                dockerImage = dockerImageTest
-                break
-            }
-        }
+        val dockerImage: DockerImage = userTemplateRepository.findDockerImageByContainerID(userName, userImageResponseDto.containerId)
 
         // do work[Successful work]
         var responseString: String = nodeService.restartContainer(dockerImage)
