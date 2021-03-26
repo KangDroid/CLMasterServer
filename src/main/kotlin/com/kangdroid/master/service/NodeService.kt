@@ -4,13 +4,12 @@ import com.kangdroid.master.data.docker.DockerImage
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
 import com.kangdroid.master.data.node.Node
-import com.kangdroid.master.data.node.NodeRepository
+import com.kangdroid.master.data.node.NodeTemplateRepository
 import com.kangdroid.master.data.node.dto.NodeAliveResponseDto
 import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.error.exception.ConflictException
-import com.kangdroid.master.error.exception.NotFoundException
 import com.kangdroid.master.error.exception.UnknownErrorException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,7 +26,7 @@ import javax.annotation.PostConstruct
 @Service
 class NodeService {
     @Autowired
-    private lateinit var nodeRepository: NodeRepository
+    private lateinit var nodeTemplateRepository: NodeTemplateRepository
 
     @Autowired
     private lateinit var userService: UserService
@@ -62,10 +61,7 @@ class NodeService {
     fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): ResponseEntity<UserImageResponseDto> {
         logger.info("createContainer started for user: ${userImageSaveRequestDto.userToken}")
         // Find Compute Node information given DTO - to register image on that container.
-        val node: Node = nodeRepository.findByRegionName(userImageSaveRequestDto.computeRegion) ?: run {
-            logger.error("Invalid Compute region specified: ${userImageSaveRequestDto.computeRegion} seems like it is not available.")
-            throw NotFoundException("Cannot find Compute Region!")
-        }
+        val node: Node = nodeTemplateRepository.findNodeByRegionName(userImageSaveRequestDto.computeRegion)
 
         // Request compute-node to create a fresh container
         logger.info("Requesting to node server...")
@@ -107,11 +103,11 @@ class NodeService {
     fun restartContainer(dockerImage: DockerImage): String {
         logger.info("Restarting container requested for ${dockerImage.dockerId}")
 
-        val node: Node = nodeRepository.findByRegionName(dockerImage.computeRegion)
-            ?: run {
-                logger.info("Seems like invalid region is requested: ${dockerImage.computeRegion}")
-                return "Cannot find Compute Region!"
-            }
+        val node: Node = runCatching {
+            nodeTemplateRepository.findNodeByRegionName(dockerImage.computeRegion)
+        }.getOrElse {
+            return "Cannot find Compute Region!"
+        }
 
         // Request compute-node to create a fresh container
         val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/restart"
@@ -148,7 +144,7 @@ class NodeService {
     fun getNodeInformation(): ResponseEntity<List<NodeInformationResponseDto>> {
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(nodeRepository.findAll().stream()
+            .body(nodeTemplateRepository.findAll().stream()
                 .map { NodeInformationResponseDto(it, restTemplate) }
                 .collect(Collectors.toList())
             )
@@ -168,14 +164,17 @@ class NodeService {
         val node: Node = nodeSaveRequestDto.toEntity()
 
         // Set Region Name based on db's count
-        node.regionName = "Region-${nodeRepository.count()}"
+        node.regionName = "Region-${nodeTemplateRepository.count()}"
 
         // Find Any duplicated registered node. - if duplicated node found, return "Error"
         logger.info("Finding any duplicated region..")
-        val nodeGot: Node = nodeRepository.findByIpAddress(node.ipAddress) ?: Node(hostName = "SHOULD_HERE")
-        if (nodeGot.hostName != "SHOULD_HERE") {
+        runCatching {
+            nodeTemplateRepository.findNodeByIpAddress(node.ipAddress)
+        }.onSuccess {
             logger.error("Duplicated compute node is found on IP Address: ${node.ipAddress}")
             throw ConflictException("Duplicated Compute Node is found on IP Address: ${node.ipAddress}")
+        }.onFailure {
+            // intended
         }
 
         // Check for node integrity
@@ -190,7 +189,7 @@ class NodeService {
             logger.info("Succeed to save node for ${nodeSaveRequestDto.ipAddress}!")
             ResponseEntity
                 .status(HttpStatus.OK)
-                .body(NodeSaveResponseDto(nodeRepository.save(node)))
+                .body(NodeSaveResponseDto(nodeTemplateRepository.saveNode(node)))
         }
     }
 

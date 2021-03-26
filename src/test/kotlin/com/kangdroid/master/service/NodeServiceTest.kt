@@ -4,7 +4,7 @@ import com.kangdroid.master.config.TestConfiguration
 import com.kangdroid.master.data.docker.DockerImage
 import com.kangdroid.master.data.docker.dto.UserImageResponseDto
 import com.kangdroid.master.data.docker.dto.UserImageSaveRequestDto
-import com.kangdroid.master.data.node.NodeRepository
+import com.kangdroid.master.data.node.NodeTemplateRepository
 import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
@@ -46,7 +46,7 @@ class NodeServiceTest {
     private lateinit var nodeService: NodeService
 
     @Autowired
-    private lateinit var nodeRepository: NodeRepository
+    private lateinit var nodeTemplateRepository: NodeTemplateRepository
 
     @Autowired
     private lateinit var userService: UserService
@@ -67,7 +67,7 @@ class NodeServiceTest {
     @Before
     @After
     fun clearAllRepo() {
-        nodeRepository.deleteAll()
+        nodeTemplateRepository.clearAll()
         userTemplateRepository.clearAll()
     }
 
@@ -191,7 +191,7 @@ class NodeServiceTest {
 
         // Assert
         assertThat(returnValue.regionName.length).isGreaterThan(0)
-        assertThat(returnValue.regionName).isEqualTo("Region-${nodeRepository.count() - 1}")
+        assertThat(returnValue.regionName).isEqualTo("Region-${nodeTemplateRepository.count() - 1}")
 
         // Duplication Test
         runCatching {
@@ -275,7 +275,7 @@ class NodeServiceTest {
         }.onSuccess {
             fail("Seems like this should fail, but succeed somehow!")
         }.onFailure {
-            assertThat(it.message).isEqualTo("Cannot find Compute Region!")
+            assertThat(it.message).contains("Cannot find node with region:")
         }
         userImageSaveRequestDto.computeRegion = returnValue.regionName // restore region
 

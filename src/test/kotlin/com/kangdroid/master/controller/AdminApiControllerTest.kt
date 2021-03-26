@@ -1,8 +1,8 @@
 package com.kangdroid.master.controller
 
 import com.kangdroid.master.config.TestConfiguration
-import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
+import com.kangdroid.master.data.user.AdminInitializer
 import com.kangdroid.master.data.user.UserTemplateRepository
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
@@ -12,6 +12,7 @@ import com.kangdroid.master.service.UserService
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,7 +39,7 @@ class AdminApiControllerTest {
     private lateinit var testRestTemplate: TestRestTemplate
 
     @Autowired
-    private lateinit var nodeRepository: NodeRepository
+    private lateinit var nodeTemplateRepository: UserTemplateRepository
 
     @Autowired
     private lateinit var testConfiguration: TestConfiguration
@@ -52,12 +53,22 @@ class AdminApiControllerTest {
     @Autowired
     private lateinit var userTemplateRepository: UserTemplateRepository
 
+    @Autowired
+    private lateinit var adminInitializer: AdminInitializer
+
     private val baseUrl: String = "http://localhost"
+
+    @Before
+    fun initSetup() {
+        nodeTemplateRepository.clearAll()
+        userTemplateRepository.clearAll()
+        adminInitializer.initAdmin()
+    }
 
     @After
     fun cleanDb() {
-        nodeRepository.deleteAll()
-        // userRepository.deleteAll()
+        nodeTemplateRepository.clearAll()
+        userTemplateRepository.clearAll()
     }
 
     // Register Demo User for testing purpose.
