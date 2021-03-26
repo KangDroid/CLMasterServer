@@ -9,14 +9,14 @@ import javax.annotation.PostConstruct
 class AdminInitializer {
 
     @Autowired
-    private lateinit var userRepository: UserRepository
+    private lateinit var userTemplateRepository: UserTemplateRepository
 
     @Autowired
     private lateinit var passwordEncoder: PasswordEncryptorService
 
     @PostConstruct
     fun initAdmin() {
-        userRepository.save(
+        userTemplateRepository.saveUser(
             User(
                 userName = "root",
                 userPassword = passwordEncoder.encodePlainText("testPassword"),

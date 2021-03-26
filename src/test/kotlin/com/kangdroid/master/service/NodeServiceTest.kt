@@ -10,6 +10,7 @@ import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
+import com.kangdroid.master.data.user.UserTemplateRepository
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
@@ -52,7 +53,7 @@ class NodeServiceTest {
     private lateinit var userService: UserService
 
     @Autowired
-    private lateinit var userRepository: UserRepository
+    private lateinit var userTemplateRepository: UserTemplateRepository
 
     @Autowired
     private lateinit var passwordEncryptorService: PasswordEncryptorService
@@ -68,7 +69,7 @@ class NodeServiceTest {
     @After
     fun clearAllRepo() {
         nodeRepository.deleteAll()
-        userRepository.deleteAll()
+        userTemplateRepository.clearAll()
     }
 
     @PostConstruct
@@ -337,7 +338,8 @@ class NodeServiceTest {
         val userName: String? = userService.getUserName(loginToken)
         assertThat(userName).isNotEqualTo(null) // username should not be equal
 
-        val user: User = userRepository.findByUserName(userName!!)!!
+        // TODO: Implement Query instead of iterating through list.
+        val user: User = userTemplateRepository.findByUserName(userName!!)
         lateinit var dockerImage: DockerImage
         for (dockerImageTest in user.dockerImage) {
             if (dockerImageTest.dockerId == userImageResponseDto.containerId) {

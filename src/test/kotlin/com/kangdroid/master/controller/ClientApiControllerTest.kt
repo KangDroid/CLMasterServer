@@ -7,6 +7,7 @@ import com.kangdroid.master.data.node.dto.NodeInformationResponseDto
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.UserRepository
+import com.kangdroid.master.data.user.UserTemplateRepository
 import com.kangdroid.master.data.user.dto.*
 import com.kangdroid.master.error.ErrorResponse
 import com.kangdroid.master.service.NodeService
@@ -44,7 +45,7 @@ class ClientApiControllerTest {
     private lateinit var testRestTemplate: TestRestTemplate
 
     @Autowired
-    private lateinit var userRepository: UserRepository
+    private lateinit var userTemplateRepository: UserTemplateRepository
 
     @Autowired
     private lateinit var testConfiguration: TestConfiguration
@@ -124,7 +125,7 @@ class ClientApiControllerTest {
     @After
     fun clearAllRepo() {
         nodeRepository.deleteAll()
-        userRepository.deleteAll()
+        userTemplateRepository.clearAll()
     }
 
     // Register Demo User for testing purpose.

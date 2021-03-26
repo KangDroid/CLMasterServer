@@ -4,6 +4,7 @@ import com.kangdroid.master.config.TestConfiguration
 import com.kangdroid.master.data.node.NodeRepository
 import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.user.UserRepository
+import com.kangdroid.master.data.user.UserTemplateRepository
 import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
@@ -51,7 +52,7 @@ class AdminApiControllerTest {
     private lateinit var userService: UserService
 
     @Autowired
-    private lateinit var userRepository: UserRepository
+    private lateinit var userTemplateRepository: UserTemplateRepository
 
     private val baseUrl: String = "http://localhost"
 

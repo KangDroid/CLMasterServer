@@ -10,6 +10,7 @@ import com.kangdroid.master.data.node.dto.NodeSaveRequestDto
 import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserRepository
+import com.kangdroid.master.data.user.UserTemplateRepository
 import com.kangdroid.master.data.user.dto.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
@@ -42,7 +43,7 @@ class UserServiceTest {
     private lateinit var userService: UserService
 
     @Autowired
-    private lateinit var userRepository: UserRepository
+    private lateinit var userTemplateRepository: UserTemplateRepository
 
     @Autowired
     private lateinit var testConfiguration: TestConfiguration
@@ -112,7 +113,7 @@ class UserServiceTest {
 
     @After
     fun clearUserDb() {
-        userRepository.deleteAll()
+        userTemplateRepository.clearAll()
     }
 
     // Register Demo User for testing purpose.
@@ -256,15 +257,15 @@ class UserServiceTest {
         // With Some dummy image
         val userName: String? = userService.getUserName(loginToken)
         assertThat(userName).isNotEqualTo(null) // userName should not be equal
-        val user: User? = userRepository.findByUserName(userName!!)
+        val user: User = userTemplateRepository.findByUserName(userName!!)
         assertThat(user).isNotEqualTo(null)
-        user!!.dockerImage.add(
+        user.dockerImage.add(
             DockerImage(
                 dockerId = "",
                 computeRegion = ""
             )
         )
-        userRepository.save(user)
+        userTemplateRepository.saveUser(user)
 
         responseEntity = userService.listContainer(loginToken)
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
