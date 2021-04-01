@@ -37,6 +37,7 @@ spring:
 logging:
   level:
     root: trace
+admin-node: ~
 ---
 spring:
   jpa:

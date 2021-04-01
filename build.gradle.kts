@@ -60,7 +60,8 @@ tasks.jacocoTestCoverageVerification {
                 "com.kangdroid.master.data.**",
                 "com.kangdroid.master.CLMasterServerKt",
                 "com.kangdroid.master.service.UserService.login.**",
-                "com.kangdroid.master.security.**"
+                "com.kangdroid.master.security.**",
+                "com.kangdroid.master.config.**"
             )
         }
     }
