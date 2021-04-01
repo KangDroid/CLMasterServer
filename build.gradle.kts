@@ -115,6 +115,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnit()
+    systemProperty("spring.profiles.active", "debugging")
 }
 
 tasks.test {
