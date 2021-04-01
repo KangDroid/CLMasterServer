@@ -6,6 +6,7 @@ import com.kangdroid.master.service.NodeService
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.http.HttpStatus
@@ -14,7 +15,10 @@ import javax.annotation.PostConstruct
 
 @ConstructorBinding
 @ConfigurationProperties("admin-node")
-data class AdminNodeConfig(val nodes: List<NodeConfiguration>?, val nodeService: NodeService) {
+data class AdminNodeConfig(val nodes: List<NodeConfiguration>?) {
+    @Autowired
+    private lateinit var nodeService: NodeService
+
     private val logger: Logger = LoggerFactory.getLogger(AdminNodeConfig::class.java)
     data class NodeConfiguration(
         val nodeIp: String?,

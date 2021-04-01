@@ -17,6 +17,7 @@ spring:
 logging:
   level:
     root: info
+admin-node: ~
 ---
 spring:
   jpa:
@@ -58,3 +59,8 @@ spring:
 logging:
   level:
     root: info
+admin-node:
+  nodes:
+    -
+      nodeIp: 192.168.1.9
+      nodePort: 8080
