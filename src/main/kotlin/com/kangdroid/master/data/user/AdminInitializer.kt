@@ -20,7 +20,7 @@ class AdminInitializer {
             User(
                 userName = "root",
                 userPassword = passwordEncoder.encodePlainText("testPassword"),
-                roles = setOf("ROLE_ADMIN")
+                roles = setOf("ROLE_ADMIN", "ROLE_USER")
             )
         )
     }
