@@ -37,3 +37,23 @@ spring:
 logging:
   level:
     root: trace
+---
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  datasource:
+    hikari:
+      jdbc-url: jdbc:h2:mem:testdb;MODE=MYSQL
+      username: sa
+  h2:
+    console:
+      enabled: true
+  config:
+    activate:
+      on-profile: laboratory
+logging:
+  level:
+    root: info
