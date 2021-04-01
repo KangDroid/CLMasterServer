@@ -93,6 +93,9 @@ class NodeService {
             throw UnknownErrorException(checkResponse)
         }
 
+        node.containerList.add(userImageResponseDto.containerId)
+        nodeTemplateRepository.saveNode(node)
+
         logger.info("Successfully created container: ${userImageResponseDto.containerId}")
         logger.info("Returning entity for user: ${userImageSaveRequestDto.userToken}")
         return ResponseEntity
