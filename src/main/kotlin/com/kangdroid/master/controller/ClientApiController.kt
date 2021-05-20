@@ -79,7 +79,13 @@ class ClientApiController {
         val tokenList: List<String> = httpHeaders["X-AUTH-TOKEN"]!!
         userImageSaveRequestDto.userToken = tokenList[0]
 
-        return nodeService.createContainer(userImageSaveRequestDto)
+        val responseEntity: ResponseEntity<UserImageResponseDto> =
+            nodeService.createContainer(userImageSaveRequestDto)
+
+        // Add Docker Image information to User Service
+        userService.saveWithCheck(userImageSaveRequestDto.userToken, responseEntity.body!!)
+
+        return responseEntity
     }
 
     /**

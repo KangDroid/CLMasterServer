@@ -14,6 +14,7 @@ import com.kangdroid.master.data.user.dto.UserLoginRequestDto
 import com.kangdroid.master.data.user.dto.UserLoginResponseDto
 import com.kangdroid.master.data.user.dto.UserRegisterDto
 import com.kangdroid.master.data.user.dto.UserRegisterResponseDto
+import com.kangdroid.master.error.exception.UnknownErrorException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.bson.types.ObjectId
@@ -268,15 +269,6 @@ class NodeServiceTest {
         assertThat(userImageResponseDto.targetPort).isNotEqualTo("")
         assertThat(userImageResponseDto.regionLocation).isEqualTo(returnValue.regionName)
 
-        // do work[Failure: Wrong token somehow]
-        userImageSaveRequestDto.userToken = ""
-        runCatching {
-            userImageResponseEntity = nodeService.createContainer(userImageSaveRequestDto)
-        }.onSuccess {
-            fail("Seems like this should fail, but succeed somehow!")
-        }
-        userImageSaveRequestDto.userToken = loginToken // restore token
-
         // setup mock
         val originalRequestFactory: ClientHttpRequestFactory = nodeService.restTemplate.requestFactory
         val mockServerFailing: MockRestServiceServer = MockRestServiceServer.bindTo(nodeService.restTemplate).build()
@@ -290,7 +282,7 @@ class NodeServiceTest {
         }.onSuccess {
             fail("Seems like this should fail, but succeed somehow!")
         }.onFailure {
-            assertThat(it.message).isEqualTo("Cannot communicate with Compute node!")
+            assertThat(it is UnknownErrorException).isEqualTo(true)
         }
 
         mockServerFailing.verify()
@@ -322,11 +314,13 @@ class NodeServiceTest {
         val userImageResponseDto: UserImageResponseDto =
             nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
 
-        // Find Docker Image Entity
-        val userName: String? = userService.getUserName(loginToken)
-        assertThat(userName).isNotEqualTo(null) // username should not be equal
+        // save it
+        userService.saveWithCheck(loginToken, userImageResponseDto)
 
-        val user: User = userTemplateRepository.findByUserName(userName!!)
+        // Find Docker Image Entity
+        val userName: String = userService.getUserName(loginToken)
+
+        val user: User = userTemplateRepository.findByUserName(userName)
         val dockerImage: DockerImage = userTemplateRepository.findDockerImageByContainerID(userName, userImageResponseDto.containerId)
 
         // do work[Successful work]

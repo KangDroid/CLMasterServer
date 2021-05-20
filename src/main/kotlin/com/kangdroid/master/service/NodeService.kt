@@ -56,43 +56,20 @@ class NodeService {
      * createContainer(param dto): Create Container in Compute Node's Server, with given DTO
      * Param: UserImageSaveRequestDto[id, password, docker-ID, compute-region]
      * returns: UserImageResponseDto - Containing Full information about container
-     * returns: UserImageResponseDto - Containing Error Message.
      */
     fun createContainer(userImageSaveRequestDto: UserImageSaveRequestDto): ResponseEntity<UserImageResponseDto> {
         logger.info("createContainer started for user: ${userImageSaveRequestDto.userToken}")
-        // Find Compute Node information given DTO - to register image on that container.
 
         // Find Compute Node - automatically sort out
-        val nodeList: List<Node> = nodeTemplateRepository.findAll(true)
-        val node: Node = nodeList[0]
+        val node: Node = getBestNodeRR()
 
         // Request compute-node to create a fresh container
         logger.info("Requesting to node server...")
-        val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
-        val responseEntity: ResponseEntity<UserImageResponseDto> =
-            runCatching<ResponseEntity<UserImageResponseDto>> {
-                restTemplate.postForEntity(url, UserImageResponseDto::class.java)
-            }.onFailure {
-                logger.error("Requesting to node server failed.")
-                logger.error("The Stack Trace:")
-                logger.error(it.stackTraceToString())
-            }.getOrNull() ?: run {
-                throw UnknownErrorException("Cannot communicate with Compute node!")
-            }
-
-        val userImageResponseDto: UserImageResponseDto = responseEntity.body!!
-        userImageResponseDto.regionLocation = userImageSaveRequestDto.computeRegion
-
-        // Save back to dockerImage DBData
-        logger.info("Saving image information to DB Data")
-        val checkResponse: String = userService.saveWithCheck(userImageSaveRequestDto.userToken, userImageResponseDto)
-
-        if (checkResponse != "") {
-            logger.error("Error occurred when saving information to DB!")
-            logger.error(checkResponse)
-            throw UnknownErrorException(checkResponse)
+        val userImageResponseDto: UserImageResponseDto = requestCreateContainerToNode(node).apply {
+            regionLocation = userImageSaveRequestDto.computeRegion
         }
 
+        // Add Docker Image[ID] information to Node List
         node.containerList.add(userImageResponseDto.containerId)
         nodeTemplateRepository.saveNode(node)
 
@@ -226,5 +203,29 @@ class NodeService {
             value = response.isDockerServerRunning,
             cause = response.errorMessage
         )
+    }
+
+    private fun getBestNodeRR(): Node {
+        val nodeList: List<Node> = nodeTemplateRepository.findAll(true)
+        if (nodeList.isEmpty()) {
+            throw UnknownErrorException("Cannot find node data!")
+        }
+
+        return nodeList[0]
+    }
+
+    private fun requestCreateContainerToNode(node: Node): UserImageResponseDto {
+        val url: String = "http://${node.ipAddress}:${node.hostPort}/api/node/image"
+        val responseEntity: ResponseEntity<UserImageResponseDto> =
+            runCatching<ResponseEntity<UserImageResponseDto>> {
+                restTemplate.postForEntity(url, UserImageResponseDto::class.java)
+            }.getOrElse {
+                logger.error("Requesting to node server failed.")
+                logger.error("The Stack Trace:")
+                logger.error(it.stackTraceToString())
+                throw UnknownErrorException("Cannot communicate with Compute node!")
+            }
+
+        return responseEntity.body!!
     }
 }

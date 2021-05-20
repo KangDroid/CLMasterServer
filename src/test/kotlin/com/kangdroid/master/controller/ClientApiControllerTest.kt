@@ -371,6 +371,8 @@ class ClientApiControllerTest {
         val userImageResponseDto: UserImageResponseDto =
             nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
 
+        userService.saveWithCheck(loginToken, userImageResponseDto)
+
         // Restart Request Dto
         val userRestartRequestDto: UserRestartRequestDto = UserRestartRequestDto(
             userToken = "",

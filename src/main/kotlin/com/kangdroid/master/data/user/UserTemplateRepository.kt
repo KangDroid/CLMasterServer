@@ -44,13 +44,9 @@ class UserTemplateRepository {
         logger.debug("Query: $findQuery")
 
         // This is nullable
-        return runCatching {
-            mongoTemplate.findOne(findQuery, User::class.java)
-        }.getOrElse {
-            logger.error(it.stackTraceToString())
-            // Return null
-            null
-        } ?: throw NotFoundException("Cannot find user: $userName")
+        return mongoTemplate.findOne(findQuery, User::class.java) ?: run {
+            throw NotFoundException("Cannot find user: $userName")
+        }
     }
 
     fun findDockerImageByContainerID(userName: String, containerId: String): DockerImage {

@@ -10,7 +10,6 @@ import com.kangdroid.master.error.exception.ForbiddenException
 import com.kangdroid.master.error.exception.NotFoundException
 import com.kangdroid.master.error.exception.UnknownErrorException
 import com.kangdroid.master.security.JWTTokenProvider
-import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,10 +36,7 @@ class UserService {
     private val logger: Logger = LoggerFactory.getLogger(UserService::class.java)
 
     fun getUserInformation(token: String): ResponseEntity<UserInformationResponseDto> {
-        val userName: String = getUserName(token) ?: run {
-            logger.error("Token is acquired but cannot find user.")
-            throw NotFoundException("Cannot find user!")
-        }
+        val userName: String = getUserName(token)
         val userEntity: User = userTemplateRepository.findByUserName(userName)
 
         logger.debug("getUserInformation succeed. It should return OK sign with correct body now.")
@@ -52,17 +48,14 @@ class UserService {
         )
     }
 
-    fun getUserName(token: String): String? {
-        var userName: String? = null
-        runCatching {
-            userName = jwtTokenProvider.getUserPk(token)
-        }.onFailure {
+    fun getUserName(token: String): String {
+        return runCatching {
+            jwtTokenProvider.getUserPk(token)
+        }.getOrElse {
             logger.error("Error occurred when getting username!")
             logger.error("StackTrace: ${it.stackTraceToString()}")
-            userName = null
+            throw NotFoundException("Cannot find username with token: $token!")
         }
-
-        return userName
     }
 
     fun registerUser(userRegisterDto: UserRegisterDto): ResponseEntity<UserRegisterResponseDto> {
@@ -128,14 +121,9 @@ class UserService {
      * Returns: Empty String
      * Returns: An Error Message
      */
-    fun saveWithCheck(token: String, userImageResponseDto: UserImageResponseDto): String {
+    fun saveWithCheck(token: String, userImageResponseDto: UserImageResponseDto) {
         val userName: String = getUserName(token)
-            ?: return "Cannot Find User. Please Re-Login"
-        val user: User = runCatching {
-            userTemplateRepository.findByUserName(userName)
-        }.getOrElse {
-            return "Cannot Find User. Please Re-Login"
-        }
+        val user: User = userTemplateRepository.findByUserName(userName)
 
         // TODO: Just insert user's document by query
         user.dockerImage.add(
@@ -145,7 +133,6 @@ class UserService {
             )
         )
         userTemplateRepository.saveUser(user)
-        return ""
     }
 
     /**
@@ -155,7 +142,6 @@ class UserService {
      */
     fun listContainer(userToken: String): ResponseEntity<List<UserImageListResponseDto>> {
         val userName: String = getUserName(userToken)
-            ?: throw NotFoundException("Cannot Find User. Please Re-Login")
         val user: User = userTemplateRepository.findByUserName(userName)
 
         val mutableImageList: MutableList<UserImageListResponseDto> = mutableListOf()
@@ -179,7 +165,6 @@ class UserService {
      */
     fun restartContainer(userRestartRequestDto: UserRestartRequestDto): ResponseEntity<Void> {
         val userName: String = getUserName(userRestartRequestDto.userToken)
-            ?: throw NotFoundException("Cannot find user with token!")
 
         val targetDockerImage: DockerImage = userTemplateRepository.findDockerImageByContainerID(userName, userRestartRequestDto.containerId)
 

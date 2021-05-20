@@ -11,6 +11,7 @@ import com.kangdroid.master.data.node.dto.NodeSaveResponseDto
 import com.kangdroid.master.data.user.User
 import com.kangdroid.master.data.user.UserTemplateRepository
 import com.kangdroid.master.data.user.dto.*
+import com.kangdroid.master.error.exception.NotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.bson.types.ObjectId
@@ -236,7 +237,7 @@ class UserServiceTest {
         }.onSuccess {
             fail("This should be failed, but somehow it succeed!")
         }.onFailure {
-            assertThat(it.message).isEqualTo("Cannot Find User. Please Re-Login")
+            assertThat(it is NotFoundException).isEqualTo(true)
         }
 
         // With Some dummy image
@@ -264,14 +265,23 @@ class UserServiceTest {
     fun isSavingWithCheckWorksWell() {
         val loginToken: String = registerDemoUser()
         val userImageResponseDto: UserImageResponseDto = UserImageResponseDto() // empty one
+        runCatching {
+            userService.saveWithCheck(loginToken, userImageResponseDto)
+        }.onFailure {
+            fail("Something went wrong: ${it.stackTraceToString()}")
+        }.onSuccess {
+            val user: User = userTemplateRepository.findByUserName("KangDroid")
+            assertThat(user.dockerImage.size).isEqualTo(1)
+        }
 
-        // With Correct Token
-        var responseString: String = userService.saveWithCheck(loginToken, userImageResponseDto)
-        assertThat(responseString).isEqualTo("")
+        runCatching {
+            userService.saveWithCheck("loginToken", userImageResponseDto)
+        }.onFailure {
+            assertThat(it is NotFoundException).isEqualTo(true)
+        }.onSuccess {
+            fail("Since we there is no proper login token, but it succeed?")
+        }
 
-        // With Wrong Token
-        responseString = userService.saveWithCheck("", userImageResponseDto)
-        assertThat(responseString).isNotEqualTo("")
     }
 
     @Test
@@ -298,6 +308,8 @@ class UserServiceTest {
         val userImageResponseDto: UserImageResponseDto =
             nodeService.createContainer(userImageSaveRequestDto).body as UserImageResponseDto
 
+        userService.saveWithCheck(loginToken, userImageResponseDto)
+
         // userRestartRequestDto
         val userRestartRequestDto: UserRestartRequestDto = UserRestartRequestDto(
             userToken = loginToken,
@@ -315,7 +327,7 @@ class UserServiceTest {
         }.onSuccess {
             fail("Token is null, but it succeed somehow. Aborting!")
         }.onFailure {
-            assertThat(it.message).isEqualTo("Cannot find user with token!")
+            assertThat(it is NotFoundException).isEqualTo(true)
         }
         userRestartRequestDto.userToken = loginToken // restore token
 
@@ -350,11 +362,11 @@ class UserServiceTest {
     @Test
     fun is_getUserInformation_returning_NotFound_invalid_token() {
         runCatching {
-            userService.getUserInformation("test")
+            userService.getUserInformation("test.test.test")
         }.onSuccess {
             fail("Wrong token is passed, but somehow test succeed!")
         }.onFailure {
-            assertThat(it.message).isEqualTo("Cannot find user!")
+            assertThat(it is NotFoundException).isEqualTo(true)
         }
     }
 
